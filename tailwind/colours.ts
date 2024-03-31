@@ -1,11 +1,14 @@
 import plugin from "tailwindcss/plugin";
 
-const colours = plugin(
+export const Colours = plugin(
     ({ addUtilities, addComponents, e, config }) => {},
     {
         theme: {
             extend: {
                 colors: {
+                    cloudyDark: "#0a0909",
+                    cloudyLight: "#b3c4c4",
+
                     exeBlack: "#090b11",
                     exeGray: "#9ca3af",
                     goldyPink: "#fb89ab",
@@ -34,5 +37,3 @@ const colours = plugin(
         }
     },
 );
-
-module.exports = colours;
