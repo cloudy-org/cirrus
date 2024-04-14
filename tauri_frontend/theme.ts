@@ -1,3 +1,4 @@
+import { platform } from "@tauri-apps/api/os";
 import { invoke } from "@tauri-apps/api/tauri";
 import { getMatches } from "@tauri-apps/api/cli";
 
@@ -6,14 +7,18 @@ import { getMatches } from "@tauri-apps/api/cli";
  */
 export function initTheme() {
     getMatches().then((matches) => {
-        let theme = matches.args["theme"].value;
+        let theme = matches.args.theme?.value;
 
-        if (theme == false) {
+        if (theme == false || theme == null) {
             theme = "auto";
         }
 
-        invoke("plugin:theme|set_theme", {
-            theme: theme,
+        platform().then((os) => {
+            if (os == "win32") return;
+
+            invoke("plugin:theme|set_theme", {
+                theme: theme,
+            });
         });
     });
 }
