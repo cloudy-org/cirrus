@@ -1,0 +1,1 @@
+export { initTheme } from "./theme";
