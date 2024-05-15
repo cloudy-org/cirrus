@@ -1,1 +1,1 @@
-export { initTheme } from "./theme";
+export { initTheme } from "../tailwind/theme";
