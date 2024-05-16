@@ -1,1 +1,0 @@
-export { initTheme } from "../tailwind/theme";
