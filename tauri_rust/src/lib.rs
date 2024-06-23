@@ -1,5 +1,6 @@
 use tauri::{plugin::{Builder, TauriPlugin}, Wry};
 
+pub mod serde;
 pub mod commands;
 
 pub fn init() -> TauriPlugin<Wry> {
