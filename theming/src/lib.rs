@@ -9,7 +9,7 @@ impl Theme {
         let hex_code = if is_dark {
             String::from("#0a0909")
         } else {
-            String::from("#b3c4c4")
+            String::from("#b4dede")
         };
 
         Theme { 

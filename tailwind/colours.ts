@@ -7,7 +7,7 @@ export const Colours = plugin(
             extend: {
                 colors: {
                     cloudyDark: "#0a0909",
-                    cloudyLight: "#b3c4c4",
+                    cloudyLight: "#b4dede",
 
                     exeBlack: "#090b11",
                     exeGray: "#9ca3af",
