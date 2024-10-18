@@ -1,4 +1,5 @@
 
+#[derive(Clone)]
 pub struct Theme {
     pub is_dark: bool,
     pub hex_code: String
