@@ -1,20 +1,44 @@
+#[derive(Clone)]
+pub struct Colour {
+    pub hex_code: String
+}
 
 #[derive(Clone)]
 pub struct Theme {
     pub is_dark: bool,
-    pub hex_code: String
+    /// NOTE: The primary colour should be used as a background colour.
+    pub primary_colour: Colour,
+    pub secondary_colour: Colour,
+    pub third_colour: Colour,
+    pub accent_colour: Colour,
 }
 
 impl Theme {
     pub fn default(is_dark: bool) -> Self {
-        let hex_code = if is_dark {
-            String::from("#0a0909")
+        let primary = if is_dark {
+            Colour {hex_code: "#0a0909".into()}
         } else {
-            String::from("#b4dede")
+            Colour {hex_code: "#b4dede".into()}
+        };
+
+        let secondary = if is_dark {
+            Colour {hex_code: "#201f1f".into()}
+        } else {
+            Colour {hex_code: "#aec5d4".into()}
+        };
+
+        let third = if is_dark {
+            Colour {hex_code: "#494848".into()}
+        } else {
+            Colour {hex_code: "#57575b".into()}
         };
 
         Theme { 
-            is_dark, hex_code
+            is_dark,
+            primary_colour: primary,
+            secondary_colour: secondary,
+            third_colour: third,
+            accent_colour: Colour { hex_code: "#e05f78".into() },
         }
     }
 }
