@@ -10,7 +10,7 @@ pub struct Theme {
     pub primary_colour: Colour,
     pub secondary_colour: Colour,
     pub third_colour: Colour,
-    pub accent_colour: Colour,
+    pub accent_colour: Option<Colour>,
 }
 
 impl Theme {
@@ -38,7 +38,7 @@ impl Theme {
             primary_colour: primary,
             secondary_colour: secondary,
             third_colour: third,
-            accent_colour: Colour { hex_code: "#e05f78".into() },
+            accent_colour: None,
         }
     }
 }
