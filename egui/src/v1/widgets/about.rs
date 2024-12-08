@@ -1,9 +1,11 @@
-use egui::{Color32, Context, ImageSource, Margin, Pos2, Stroke, Ui};
+use egui::{Color32, Context, ImageSource, Margin, Pos2, Response, Stroke, Ui};
 
 pub struct About<'a> {
     image: ImageSource<'a>,
     info: AboutApplicationInfo,
     show_license: bool,
+
+    pub license_window_response: Option<Response>
 }
 
 pub struct AboutApplicationInfo {
@@ -25,12 +27,17 @@ pub struct AboutAuthorInfo {
 
 impl<'a> About<'a> {
     pub fn new(image: ImageSource<'a>, info: AboutApplicationInfo) -> Self {
-        Self { image, info, show_license: false }
+        Self {
+            image,
+            info,
+            show_license: false,
+            license_window_response: None
+        }
     }
 
     pub fn update(&mut self, ctx: &Context) {
         if self.show_license {
-            egui::Window::new(
+            let response = egui::Window::new(
                 egui::WidgetText::RichText(
                     egui::RichText::new("ℹ Licence").size(15.0)
                 )
@@ -42,6 +49,8 @@ impl<'a> About<'a> {
                         ui.code(self.info.license.clone());
                     });
                 });
+
+            self.license_window_response = Some(response.unwrap().response);
         }
     }
 
@@ -75,8 +84,17 @@ impl<'a> About<'a> {
 
                 ui.add_space(space - 10.0);
 
+                // TODO: these two should open a web browser.
                 ui.button("Website");
                 ui.button("Source Code");
+                // TODO: this button should open a egui window that goes 
+                // and grabs all the contributors from the git repo (github only for now)
+                // to display their profile pictures like github's "contributors" list on repositories.
+                // 
+                // Then below that profile picture section have a list of all cargo packages used with 
+                // hyperlinks to them.
+                // 
+                // (will create an issue for this soon tm, do remind me...).
                 ui.button("Credits");
             });
 
@@ -108,6 +126,8 @@ impl<'a> About<'a> {
                 }
             );
 
+            // TODO: this button will just be
+            // an alias to the credits button. 
             ui.button("❤ and you guys!");
 
             ui.add_space(20.0);
