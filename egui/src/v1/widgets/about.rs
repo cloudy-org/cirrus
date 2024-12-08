@@ -95,6 +95,7 @@ impl<'a> About<'a> {
                         OpenUrl::new_tab(&self.info.git_repo)
                     );
                 }
+
                 // TODO: this button should open a egui window that goes 
                 // and grabs all the contributors from the git repo (github only for now)
                 // to display their profile pictures like github's "contributors" list on repositories.
@@ -103,7 +104,7 @@ impl<'a> About<'a> {
                 // hyperlinks to them.
                 // 
                 // (will create an issue for this soon tm, do remind me...).
-                ui.button("Credits");
+                let _ = ui.button("Credits");
             });
 
             ui.add_space(10.0);
@@ -140,8 +141,8 @@ impl<'a> About<'a> {
             );
 
             // TODO: this button will just be
-            // an alias to the credits button. 
-            ui.button("❤ and you guys!");
+            // an alias to the credits button.
+            let _ = ui.button("❤ and you guys!");
 
             ui.add_space(20.0);
 
