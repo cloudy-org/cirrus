@@ -120,7 +120,7 @@ impl<'a> About<'a> {
                             for author_info in self.info.authors.iter() {
                                 let github = format!("https://github.com/{}", author_info.name);
 
-                                let image = egui::Image::from_uri(github.clone() + ".png")
+                                let image = egui::Image::from_uri(format!("{}.png", &github))
                                     .rounding(100.0)
                                     .fit_to_exact_size(
                                         egui::Vec2::new(50.0, 50.0)
