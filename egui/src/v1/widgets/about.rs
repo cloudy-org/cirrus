@@ -1,4 +1,4 @@
-use egui::{Color32, Context, ImageSource, Margin, OpenUrl, Pos2, Response, Stroke, Ui};
+use egui::{Color32, Context, ImageSource, Margin, Pos2, Response, Stroke, Ui};
 
 pub struct About<'a> {
     image: ImageSource<'a>,
@@ -84,18 +84,9 @@ impl<'a> About<'a> {
 
                 ui.add_space(space - 10.0);
 
-                if ui.button("Website").clicked() {
-                    ui.ctx().open_url(
-                        OpenUrl::new_tab(&self.info.webpage)
-                    );
-                }
-
-                if ui.button("Source Code").clicked() {
-                    ui.ctx().open_url(
-                        OpenUrl::new_tab(&self.info.git_repo)
-                    );
-                }
-
+                // TODO: these two should open a web browser.
+                let _ = ui.button("Website");
+                let _ = ui.button("Source Code");
                 // TODO: this button should open a egui window that goes 
                 // and grabs all the contributors from the git repo (github only for now)
                 // to display their profile pictures like github's "contributors" list on repositories.
@@ -117,21 +108,16 @@ impl<'a> About<'a> {
                         .num_columns(self.info.authors.len())
                         .min_row_height(60.0)
                         .spacing([20.0, 4.0])
-                        .show(ui, |ui| {        
-                            for author_info in self.info.authors.iter() {
-                                let github = format!("https://github.com/{}", author_info.name);
+                        .show(ui, |ui| {
+                            // TODO: Make sure we aren't eating crazy amounts of memory with this one. 🔥
+                            let default_image = egui::Image::new(egui::include_image!("../../../../assets/no_author_image.jpg"))
+                                .rounding(100.0);
 
-                                let image = egui::Image::from_uri(format!("{}.png", &github))
-                                    .rounding(100.0)
-                                    .fit_to_exact_size(
-                                        egui::Vec2::new(50.0, 50.0)
-                                    );
-
-                                ui.add(image);
-                                ui.hyperlink_to(
+                            if let Some(author_info) = self.info.authors.iter().next() {
+                                ui.add(default_image.clone()); // TODO: Use actual author's image.
+                                ui.label(
                                     egui::RichText::new(author_info.name.clone())
-                                        .size(18.0),
-                                    &github
+                                        .size(18.0)
                                 );
                                 ui.end_row();
                             }
@@ -158,7 +144,7 @@ impl<'a> About<'a> {
 pub fn cargo_authors_to_about_authors(cargo_authors: &String) -> Vec<AboutAuthorInfo> {
     let mut about_author_infos: Vec<AboutAuthorInfo> = Vec::new();
 
-    for cargo_author in cargo_authors.split(":") {
+    for cargo_author in cargo_authors.split(",") {
         let mut owo = cargo_author.split("<");
 
         let author_name = owo.next()
