@@ -92,7 +92,6 @@ impl<'a> About<'a> {
 
                 ui.add_space(space - 10.0);
 
-                // TODO: these two should open a web browser.
                 if ui.button("Website").clicked() {
                     ui.ctx().open_url(
                         OpenUrl::new_tab(&self.info.webpage)
@@ -134,7 +133,19 @@ impl<'a> About<'a> {
                                         egui::Vec2::new(50.0, 50.0)
                                     );
                                 
-                                ui.add(image);
+                                if image.size().is_some() {
+                                    ui.add(image);
+                                } else {
+                                    let default_image = egui::Image::new(
+                                        egui::include_image!("../../../../assets/no_author_image.jpg")
+                                    )
+                                        .rounding(100.0)
+                                        .fit_to_exact_size(
+                                            egui::Vec2::new(50.0, 50.0)
+                                        );
+
+                                    ui.add(default_image);
+                                }
                                 if author_info.webpage.is_some() {
                                     ui.hyperlink_to(
                                         egui::RichText::new(author_info.name.clone())
