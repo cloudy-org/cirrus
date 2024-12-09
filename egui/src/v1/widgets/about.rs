@@ -140,7 +140,7 @@ impl<'a> About<'a> {
                                         egui::RichText::new(author_info.name.clone())
                                             .size(18.0),
                                         author_info.webpage
-                                            .as_ref()
+                                            .clone()
                                             .unwrap()
                                     );
                                 } else {
