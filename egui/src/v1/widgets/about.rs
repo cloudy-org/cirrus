@@ -112,8 +112,8 @@ impl<'a> About<'a> {
                             // TODO: Make sure we aren't eating crazy amounts of memory with this one. 🔥
                             let default_image = egui::Image::new(egui::include_image!("../../../../assets/no_author_image.jpg"))
                                 .rounding(100.0);
-        
-                            for author_info in self.info.authors.iter() {
+
+                            if let Some(author_info) = self.info.authors.iter().next() {
                                 ui.add(default_image.clone()); // TODO: Use actual author's image.
                                 ui.label(
                                     egui::RichText::new(author_info.name.clone())
