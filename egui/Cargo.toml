@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-egui = "0.29.1"
-serde = {version = "1.0.215", features = ["derive"]}
-toml = "0.8.19"
+egui = {workspace = true}
+toml = {workspace = true}
+serde = {workspace = true, features = ["derive"]}

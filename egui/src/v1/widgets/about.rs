@@ -1,4 +1,4 @@
-use egui::{Color32, Context, ImageSource, Margin, OpenUrl, Pos2, Response, Stroke, Ui};
+use egui::{Color32, Context, ImageSource, Margin, OpenUrl, Pos2, Response, Stroke, Ui, Vec2};
 use serde::Deserialize;
 
 pub struct About<'a> {
@@ -24,8 +24,7 @@ pub struct AboutApplicationInfo {
 pub struct AboutAuthorInfo {
     pub name: String,
     pub github: String,
-    pub email: Option<String>,
-    pub webpage: Option<String>,
+    pub email: Option<String>
 }
 
 #[derive(Deserialize)]
@@ -62,7 +61,7 @@ impl<'a> About<'a> {
         }
     }
 
-    pub fn show(&mut self, ui: &mut Ui) {
+    pub fn show(&mut self, ctx: &Context, ui: &mut Ui) {
         let reusable_frame = egui::Frame::canvas(ui.style())
             .fill(Color32::TRANSPARENT)
             .stroke(Stroke::NONE);
@@ -126,41 +125,31 @@ impl<'a> About<'a> {
                         .spacing([20.0, 4.0])
                         .show(ui, |ui| {
                             if let Some(author_info) = self.info.authors.iter().next() {
-                                let github = format!("https://github.com/{}", author_info.github);
-                                let image = egui::Image::from_uri(format!("{}.png", &github))
+                                let github_link = format!("https://github.com/{}", author_info.github);
+
+                                let image_size = Vec2::new(70.0, 70.0);
+
+                                let image = egui::Image::from_uri(format!("{}.png", &github_link))
                                     .rounding(100.0)
-                                    .fit_to_exact_size(
-                                        egui::Vec2::new(50.0, 50.0)
-                                    );
-                                
-                                if image.size().is_some() {
+                                    .fit_to_exact_size(image_size);
+
+                                if image.load_for_size(ctx, ui.available_size()).is_ok() {
                                     ui.add(image);
                                 } else {
                                     let default_image = egui::Image::new(
                                         egui::include_image!("../../../../assets/no_author_image.jpg")
                                     )
                                         .rounding(100.0)
-                                        .fit_to_exact_size(
-                                            egui::Vec2::new(50.0, 50.0)
-                                        );
+                                        .fit_to_exact_size(image_size);
 
                                     ui.add(default_image);
                                 }
-                                if author_info.webpage.is_some() {
-                                    ui.hyperlink_to(
-                                        egui::RichText::new(author_info.name.clone())
-                                            .size(18.0),
-                                        author_info.webpage
-                                            .clone()
-                                            .unwrap()
-                                    );
-                                } else {
-                                    ui.hyperlink_to(
-                                        egui::RichText::new(author_info.name.clone())
-                                            .size(18.0),
-                                        &github
-                                    );
-                                }
+
+                                ui.hyperlink_to(
+                                    egui::RichText::new(author_info.name.clone())
+                                        .size(18.0),
+                                    &github_link
+                                );
                                 ui.end_row();
                             }
                         }
@@ -193,8 +182,7 @@ pub fn authors_toml_to_about_authors(authors_toml: &String) -> Vec<AboutAuthorIn
         let about_author_info = AboutAuthorInfo {
             name: author.name,
             github: author.github,
-            email: author.email,
-            webpage: author.webpage,
+            email: author.email
         };
 
         about_author_infos.push(about_author_info);
