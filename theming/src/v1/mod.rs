@@ -3,6 +3,12 @@ pub struct Colour {
     pub hex_code: String
 }
 
+impl Colour {
+    fn from_hex(hex_code: String) -> Self {
+        Self { hex_code }
+    }
+}
+
 #[derive(Clone)]
 pub struct Theme {
     pub is_dark: bool,
@@ -10,6 +16,7 @@ pub struct Theme {
     pub primary_colour: Colour,
     pub secondary_colour: Colour,
     pub third_colour: Colour,
+    pub text_colour: Colour,
     pub accent_colour: Option<Colour>,
 }
 
@@ -33,11 +40,19 @@ impl Theme {
             Colour {hex_code: "#57575b".into()}
         };
 
+        let text_colour = Colour::from_hex(
+            match is_dark {
+                true => "#b5b5b5",
+                false => "#3b3b3b",
+            }.into()
+        );
+
         Theme { 
             is_dark,
             primary_colour: primary,
             secondary_colour: secondary,
             third_colour: third,
+            text_colour,
             accent_colour: None,
         }
     }
