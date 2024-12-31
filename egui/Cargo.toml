@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cirrus_theming = { workspace = true }
+
 egui = {workspace = true}
 toml = {workspace = true}
 serde = {workspace = true, features = ["derive"]}
