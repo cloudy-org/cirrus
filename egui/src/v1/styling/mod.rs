@@ -6,6 +6,7 @@ pub mod fonts;
 pub mod windows;
 pub mod background;
 
+/// Cirrus handled styling for egui... so you don't have to do allat.
 pub struct Styling<'a> {
     theme: &'a Theme,
     pub egui_style: Style,
@@ -27,11 +28,12 @@ impl<'a> Styling<'a> {
         }
     }
 
+    /// Style the entirely of egui to cloudy org styling.
     pub fn set_all(&mut self) -> &Self {
         self
             .set_background()
             .set_windows()
-            .set_fonts()
+            .set_fonts(None)
     }
 
     pub fn apply(&self, ctx: &Context) {
@@ -40,8 +42,13 @@ impl<'a> Styling<'a> {
 }
 
 impl Styling<'_> {
-    pub fn set_fonts(&mut self) -> &mut Self {
-        fonts::set_font_style(&mut self.egui_style, &self.theme.text_colour);
+    pub fn set_fonts(&mut self, text_style: Option<TextStyle>) -> &mut Self {
+        let text_style = match text_style {
+            Some(text_style) => text_style,
+            None => TextStyle::Monospace,
+        };
+
+        fonts::set_font_style(&mut self.egui_style, text_style, &self.theme.text_colour);
 
         self
     }
