@@ -54,7 +54,7 @@ impl UpdateCheck {
                         let remote = Version::parse(&tag).unwrap();
 
                         if req.matches(&remote) {
-                            return Some((format!("New version avaliable: {}", &newest_release.tag_name), ToastLevel::Info))
+                            return Some((format!("New version available: {}", &newest_release.tag_name), ToastLevel::Info))
                         } else {
                             return None
                         }
