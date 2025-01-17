@@ -1,0 +1,10 @@
+[package]
+name = "cirrus_updates"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reqwest = {version = "0.12.12", features = ["blocking", "json"]}
+semver = "1.0.24"
+
+serde = {workspace = true, features = ["derive"]}
