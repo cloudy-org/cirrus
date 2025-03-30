@@ -117,7 +117,7 @@ impl<'a> About<'a> {
             ui.heading("Created with ❤ by:");
 
             reusable_frame.clone()
-                .outer_margin(Margin::symmetric(15.0, 5.0))
+                .outer_margin(Margin::symmetric(15, 5))
                 .show(ui, |ui| {
                     egui::Grid::new("about_authors_grid")
                         .num_columns(self.info.authors.len())
