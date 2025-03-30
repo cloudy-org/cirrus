@@ -7,8 +7,8 @@ type ActualError = String;
 
 #[derive(Debug)]
 pub enum Error {
-    RequestFailed(ActualError),
-    ResponseError(Response),
+    HTTPRequestFailed(ActualError),
+    HTTPResponseError(Response),
     FailedDataDeserialization(ActualError),
     FailedToParseVersion(ActualError),
 }
@@ -26,7 +26,7 @@ pub fn get_latest_version(username: &str, repository: &str) -> Result<Option<Ver
     match client.get(github_api).header(USER_AGENT, "cirrus").send() {
         Ok(resp) => {
             if !resp.status().is_success() {
-                return Err(Error::ResponseError(resp));
+                return Err(Error::HTTPResponseError(resp));
             }
 
             let data: Vec<GitHubData> = match resp.json() {
@@ -57,7 +57,7 @@ pub fn get_latest_version(username: &str, repository: &str) -> Result<Option<Ver
             }
         },
         Err(err) => {
-            Err(Error::RequestFailed(err.to_string()))
+            Err(Error::HTTPRequestFailed(err.to_string()))
         }
     }
 }
