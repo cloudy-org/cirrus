@@ -5,8 +5,14 @@ use egui::{Context, Style, TextStyle};
 pub mod fonts;
 pub mod windows;
 pub mod background;
+pub(crate) mod visuals;
+pub(crate) mod widgets;
 
 /// Cirrus handled styling for egui... so you don't have to do allat.
+/// 
+/// **WARNING:** `custom_style` does not override anything that is being set in `Styling`!
+/// For example attributes like `.visuals` will not be overridden with `custom_style` if 
+/// `Styling.set_base_visuals()` is invoked. (`.set_base_visuals()` is invoked in `.set_all()`)
 pub struct Styling<'a> {
     theme: &'a Theme,
     pub egui_style: Style,
@@ -31,8 +37,10 @@ impl<'a> Styling<'a> {
     /// Style the entirely of egui to cloudy org styling.
     pub fn set_all(&mut self) -> &Self {
         self
+            .set_base_visuals()
             .set_background()
             .set_windows()
+            .set_widgets()
             .set_fonts(None)
     }
 
@@ -55,6 +63,23 @@ impl Styling<'_> {
 
     pub fn set_background(&mut self) -> &mut Self {
         background::set_background_style(&mut self.egui_style, &self.theme.primary_colour);
+
+        self
+    }
+
+    /// MUST be set FIRST.
+    pub fn set_base_visuals(&mut self) -> &mut Self {
+        visuals::set_base_visuals_style(&mut self.egui_style, self.theme.is_dark);
+
+        self
+    }
+
+    pub fn set_widgets(&mut self) -> &mut Self {
+        widgets::set_widgets_style(
+            &mut self.egui_style,
+            &self.theme.secondary_colour,
+            &self.theme.accent_colour
+        );
 
         self
     }

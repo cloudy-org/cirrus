@@ -17,7 +17,7 @@ pub struct Theme {
     /// Secondary colour is mostly used as a secondary background colour for floating windows 
     /// or widgets but it's a **secondary** colour so you may use it wherever you prefer is best.
     pub secondary_colour: Colour,
-    /// The complete usage of this colour is up to you. In Roseate I've used it for floating window outlines.
+    /// The complete usage of this colour is up to you for now. In Roseate I've used it for floating window outlines.
     pub third_colour: Colour,
     pub text_colour: Colour,
     pub accent_colour: Colour,
@@ -51,13 +51,13 @@ impl Theme {
         let primary = if is_dark {
             Colour {hex_code: "#0d0d0d".into()}
         } else {
-            Colour {hex_code: "#b4dede".into()}
+            Colour {hex_code: "#dff5f5".into()}
         };
 
         let secondary = if is_dark {
             Colour {hex_code: "#201f1f".into()}
         } else {
-            Colour {hex_code: "#aec5d4".into()}
+            Colour {hex_code: "#d9f0ff".into()}
         };
 
         let third = if is_dark {
