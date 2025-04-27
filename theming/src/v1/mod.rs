@@ -79,7 +79,7 @@ impl Theme {
             secondary_colour: secondary,
             third_colour: third,
             text_colour,
-            accent_colour: Colour::from_hex("#2cf5eb"),
+            accent_colour: Colour::from_hex("#7afff8"),
         }
     }
 }
