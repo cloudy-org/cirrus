@@ -130,7 +130,7 @@ impl<'a> About<'a> {
                                 let image_size = Vec2::new(70.0, 70.0);
 
                                 let image = egui::Image::from_uri(format!("{}.png", &github_link))
-                                    .rounding(100.0)
+                                    .corner_radius(100.0)
                                     .fit_to_exact_size(image_size);
 
                                 if image.load_for_size(ctx, ui.available_size()).is_ok() {
@@ -139,7 +139,7 @@ impl<'a> About<'a> {
                                     let default_image = egui::Image::new(
                                         egui::include_image!("../../../../assets/no_author_image.jpg")
                                     )
-                                        .rounding(100.0)
+                                        .corner_radius(100.0)
                                         .fit_to_exact_size(image_size);
 
                                     ui.add(default_image);
