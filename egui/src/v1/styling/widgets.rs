@@ -1,5 +1,5 @@
 use cirrus_theming::v1::Colour;
-use egui::{Color32, CornerRadius, Style};
+use egui::{Color32, Rounding, Style};
 
 pub fn set_widgets_style<'a>(
     style: &'a mut Style,
@@ -26,9 +26,9 @@ pub fn set_widgets_style<'a>(
     ).unwrap();
 
     // button rounded edge
-    style.visuals.widgets.inactive.corner_radius = CornerRadius::same(7);
-    style.visuals.widgets.active.corner_radius = CornerRadius::same(7);
-    style.visuals.widgets.hovered.corner_radius = CornerRadius::same(7);
-    style.visuals.widgets.noninteractive.corner_radius = CornerRadius::same(7);
-    style.visuals.widgets.open.corner_radius = CornerRadius::same(7);
+    style.visuals.widgets.inactive.rounding = Rounding::same(7.0);
+    style.visuals.widgets.active.rounding = Rounding::same(7.0);
+    style.visuals.widgets.hovered.rounding = Rounding::same(7.0);
+    style.visuals.widgets.noninteractive.rounding = Rounding::same(7.0);
+    style.visuals.widgets.open.rounding = Rounding::same(7.0);
 }

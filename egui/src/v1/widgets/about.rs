@@ -117,7 +117,7 @@ impl<'a> About<'a> {
             ui.heading("Created with ❤ by:");
 
             reusable_frame.clone()
-                .outer_margin(Margin::symmetric(15, 5))
+                .outer_margin(Margin::symmetric(15.0, 5.0))
                 .show(ui, |ui| {
                     egui::Grid::new("about_authors_grid")
                         .num_columns(self.info.authors.len())
@@ -130,7 +130,7 @@ impl<'a> About<'a> {
                                 let image_size = Vec2::new(70.0, 70.0);
 
                                 let image = egui::Image::from_uri(format!("{}.png", &github_link))
-                                    .corner_radius(100.0)
+                                    .rounding(100.0)
                                     .fit_to_exact_size(image_size);
 
                                 if image.load_for_size(ctx, ui.available_size()).is_ok() {
@@ -139,7 +139,7 @@ impl<'a> About<'a> {
                                     let default_image = egui::Image::new(
                                         egui::include_image!("../../../../assets/no_author_image.jpg")
                                     )
-                                        .corner_radius(100.0)
+                                        .rounding(100.0)
                                         .fit_to_exact_size(image_size);
 
                                     ui.add(default_image);
