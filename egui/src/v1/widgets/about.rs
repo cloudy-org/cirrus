@@ -46,7 +46,7 @@ impl<'a> About<'a> {
         if self.show_license {
             let response = egui::Window::new(
                 egui::WidgetText::RichText(
-                    egui::RichText::new("ℹ Licence").size(15.0)
+                    egui::RichText::new("ℹ Licence").size(15.0).into()
                 )
             )
                 .open(&mut self.show_license)
