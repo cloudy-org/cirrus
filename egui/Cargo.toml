@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cirrus_error = { path = "../error"}
 cirrus_theming = { path = "../theming"}
 
 log = "0.4"

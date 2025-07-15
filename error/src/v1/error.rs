@@ -1,4 +1,5 @@
-pub trait CloudyError: Clone {
+/// Error struct from the cirrus tool kit.
+pub trait CError: Clone {
     /// This should return a human readable message about the error that just occurred.
     /// It MUST also be easily interpretable by a non technical user as this is what 
     /// will be displayed to the user on the GUI.
