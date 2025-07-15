@@ -6,6 +6,9 @@ edition = "2021"
 [dependencies]
 cirrus_theming = { path = "../theming"}
 
+log = "0.4"
 toml = "0.8"
 egui = { version = "0.32" }
+textwrap = "0.16"
+egui-notify = { git = "https://github.com/THEGOLDENPRO/egui-notify-0.20.0.git" }
 serde = { version = "1.0", features = ["derive"] }
