@@ -3,7 +3,7 @@ use std::{marker::PhantomData, sync::{Arc, RwLock}, time::Duration};
 use egui::Context;
 use egui_notify::{Toast, ToastLevel, Toasts};
 
-use cirrus_error::v1::error::CError;
+use crate::v1::error::EguiCError;
 
 #[derive(Clone, Default)]
 pub struct Loading {
@@ -12,7 +12,7 @@ pub struct Loading {
 
 /// A neat way to inform / notify the user of what is going on in your backend with Egui.
 #[derive(Clone)]
-pub struct Notifier<E: CError> {
+pub struct Notifier<E: EguiCError> {
     /// Is anything loading? `None` = nothing is loading.
     pub loading: Option<Loading>,
     pub toasts: Arc<RwLock<Toasts>>,
@@ -22,7 +22,7 @@ pub struct Notifier<E: CError> {
     _owo: PhantomData<E>,
 }
 
-impl<E: CError> Notifier<E> {
+impl<E: EguiCError> Notifier<E> {
     pub fn new() -> Self {
         Self {
             loading: None,
@@ -96,24 +96,24 @@ impl<E: CError> Notifier<E> {
 }
 
 #[derive(Clone)]
-pub enum StringOrError<E: CError> {
+pub enum StringOrError<E: EguiCError> {
     Error(E),
     String(String),
 }
 
-impl<E: CError> From<E> for StringOrError<E> {
+impl<E: EguiCError> From<E> for StringOrError<E> {
     fn from(error: E) -> Self {
         Self::Error(error)
     }
 }
 
-impl<E: CError> From<String> for StringOrError<E> {
+impl<E: EguiCError> From<String> for StringOrError<E> {
     fn from(string: String) -> Self {
         Self::String(string)
     }
 }
 
-impl<E: CError> From<&str> for StringOrError<E> {
+impl<E: EguiCError> From<&str> for StringOrError<E> {
     fn from(string: &str) -> Self {
         Self::String(string.to_owned())
     }
