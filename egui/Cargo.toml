@@ -9,6 +9,7 @@ cirrus_theming = { path = "../theming"}
 
 log = "0.4"
 toml = "0.8"
+toml_edit = "0.23"
 egui = { version = "0.32" }
 textwrap = "0.16"
 egui-notify = { git = "https://github.com/THEGOLDENPRO/egui-notify-0.20.0.git" }
