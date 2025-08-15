@@ -148,11 +148,13 @@ impl<'a> Settings<'a> {
     pub fn show(&mut self, ctx: &Context, ui: &mut Ui, theme: &Theme) {
         self.update();
 
+        let grid_frame_colour = Color32::from_hex(&theme.secondary_colour.hex_code).unwrap();
+
         ui.vertical_centered(|ui| {
             let grid = Frame::group(&ctx.style())
                 .outer_margin(Margin::same(7))
                 .stroke(Stroke::NONE)
-                .fill(Color32::from_hex(&theme.secondary_colour.hex_code).unwrap())
+                .fill(grid_frame_colour)
                 .corner_radius(CornerRadius::same(15));
 
             grid.show(ui, |ui| {
@@ -195,23 +197,27 @@ impl<'a> Settings<'a> {
                                 },
                             };
 
-                            ui.heading(config_title);
+                            Frame::group(ui.style())
+                                .fill(grid_frame_colour.gamma_multiply(1.5))
+                                .show(ui, |ui|{
+                                    ui.heading(config_title);
 
-                            match value {
-                                Value::String(formatted) => todo!(),
-                                Value::Integer(formatted) => todo!(),
-                                Value::Float(formatted) => todo!(),
-                                Value::Boolean(formatted) => {
-                                    
-                                },
-                                Value::Datetime(formatted) => todo!(),
-                                Value::Array(array) => todo!(),
-                                Value::InlineTable(inline_table) => todo!(),
-                            }
-    
-                            ui.label(docstring);
-                            ui.end_row();
-    
+                                    // TODO: Infer type of input widget in Settings widget when type of provided 
+                                    // config variable is established (https://github.com/cloudy-org/roseate/issues/75).
+                                    match value {
+                                        Value::String(formatted) => todo!(),
+                                        Value::Integer(formatted) => todo!(),
+                                        Value::Float(formatted) => todo!(),
+                                        Value::Boolean(formatted) => {
+                                            
+                                        },
+                                        Value::Datetime(formatted) => todo!(),
+                                        Value::Array(array) => todo!(),
+                                        Value::InlineTable(inline_table) => todo!(),
+                                    }
+
+                                    ui.label(docstring);
+                                });
                         }
                     }
                 }
