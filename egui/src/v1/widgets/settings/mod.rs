@@ -44,8 +44,6 @@ impl<'a> Settings<'a> {
     }
 
     fn update(&mut self) {
-        // TODO: parse the template config and it's comments ONCE
-
         if self.template_config_items.is_none() {
             let mut template_config_items: DocItems = HashMap::new();
 
@@ -75,6 +73,8 @@ impl<'a> Settings<'a> {
         }
 
         // TODO: then parse the actual user's config and make sure it's always up to date
+        // 
+        // NOTE: ^ I don't think we need to do that any more, but I'll keep the todo until I'm sure.
     }
 
     pub fn show(&mut self, ctx: &Context, ui: &mut Ui, theme: &Theme) {
@@ -199,10 +199,7 @@ impl<'a> Settings<'a> {
                         .filter(|&char| char == '\n')
                         .count() + 1;
 
-                    // TODO: parse toml comment above toml key into this var
-                    let docstring = Self::extract_key_docstring(toml_string, line_number);
-
-                    // println!("Line num: {:?}", line_number);
+                    let docstring = Self::parse_key_docstring(toml_string, line_number);
 
                     template_config_items.insert(
                         path.to_string(),
@@ -237,10 +234,11 @@ impl<'a> Settings<'a> {
         }
     }
 
-    fn extract_key_docstring(toml_string: &str, key_line_number: usize) -> String {
+    fn parse_key_docstring(toml_string: &str, key_line_number: usize) -> String {
         let lines: Vec<&str> = toml_string.lines().collect();
-        let mut doc_lines = Vec::new();
-    
+
+        let mut docstring_lines = Vec::new();
+
         // Start from the line above the key
         let mut index = (key_line_number as isize) - 2; // key_line is 1-based
 
@@ -248,13 +246,8 @@ impl<'a> Settings<'a> {
             let line = lines[index as usize].trim_start();
 
             if line.starts_with('#') {
-                // Remove the leading `#` and any leading space after it
-                let cleaned = line.trim_start_matches('#').trim_start();
-                doc_lines.push(cleaned);
-                index -= 1;
-            } else if line.is_empty() {
-                // Allow empty lines inside the docstring block
-                doc_lines.push("");
+                let formatted_line = line.trim_start_matches('#').trim_start();
+                docstring_lines.push(formatted_line);
                 index -= 1;
             } else {
                 // Stop if we hit a non-comment, non-empty line
@@ -262,8 +255,7 @@ impl<'a> Settings<'a> {
             }
         }
 
-        // Reverse so the order is top-to-bottom
-        doc_lines.reverse();
-        doc_lines.join("\n")
+        docstring_lines.reverse();
+        docstring_lines.join("\n")
     }
 }
