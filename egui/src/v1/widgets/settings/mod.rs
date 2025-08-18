@@ -1,10 +1,10 @@
 use std::{collections::HashMap};
 
 use cirrus_theming::v1::Theme;
-use egui::{Color32, Context, CornerRadius, Frame, Margin, RichText, Stroke, Ui};
+use egui::{Color32, Context, CornerRadius, Frame, Margin, RichText, Stroke, Ui, Vec2};
 use toml_edit::{Document, Item, Table, Value};
 
-use crate::v1::widgets::settings::section::{AnySection};
+use crate::v1::{widgets::{buttons::toggle_button::{ToggleButton}, settings::section::AnySection}};
 
 pub mod section;
 
@@ -41,74 +41,6 @@ impl<'a> Settings<'a> {
         self.sections.push(section);
 
         self
-    }
-
-    fn walk_and_parse_toml_table(
-        &self,
-        toml_string: &'a str,
-        path: Option<&String>,
-        table: &Table,
-        template_config_items: &mut DocItems
-    ) {
-        for (key, item) in table.iter() {
-            // println!("Key: {}", key);
-
-            let path = match path {
-                Some(path) => &format!("{}.{}", path, key),
-                None => &key.to_string(),
-            };
-
-            match item {
-                Item::None => return,
-                Item::Value(value) => {
-                    let span_start = item.span().map(|s| s.start).expect(
-                        &format!(
-                            "Honestly if this blows up, ooooh noooo my badddd :) - Failed to find item for '{}' \
-                                in toml document that's needed to get the first column the toml key is mentioned!",
-                            path
-                        )
-                    );
-
-                    let line_number = toml_string[..span_start].chars()
-                        .filter(|&char| char == '\n')
-                        .count() + 1;
-
-                    // TODO: parse toml comment above toml key into this var
-                    let docstring = "TODO! (docstring)";
-
-                    // println!("Line num: {:?}", line_number);
-
-                    template_config_items.insert(
-                        path.to_string(),
-                        (
-                            TomlItem {
-                                key: key.to_string(),
-                                value: value.to_owned()
-                            },
-                            docstring.to_string()
-                        )
-                    );
-                },
-                Item::Table(table) => self.walk_and_parse_toml_table(
-                    toml_string,
-                    Some(path),
-                    table,
-                    template_config_items
-                ),
-                Item::ArrayOfTables(array_of_tables) => {
-                    // TODO: this needs testing!
-
-                    for child_table in array_of_tables {
-                        self.walk_and_parse_toml_table(
-                            toml_string,
-                            Some(path),
-                            child_table,
-                            template_config_items
-                        )
-                    }
-                },
-            }
-        }
     }
 
     fn update(&mut self) {
@@ -165,18 +97,18 @@ impl<'a> Settings<'a> {
                 // TODO: generate setting fields here deriving from inputted config.template.toml.
 
                 if let Some(template_config_items) = &self.template_config_items {
-                    for section in &self.sections {
-                        let (display_info, config_key_path) = match section {
-                            AnySection::String(section) => (&section.display_info, &section.config_key_path),
-                            AnySection::Bool(section) => (&section.display_info, &section.config_key_path),
-                            AnySection::Int(section) => (&section.display_info, &section.config_key_path),
+                    for section in &mut self.sections {
+                        let (section_display_info, section_config_key_path) = match section {
+                            AnySection::String(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                            AnySection::Bool(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                            AnySection::Int(section) => (section.display_info.clone(), section.config_key_path.clone()),
                         };
 
-                        if let Some((toml_item, docstring)) = template_config_items.get(config_key_path) {
+                        if let Some((toml_item, docstring)) = template_config_items.get(&section_config_key_path) {
                             let key = &toml_item.key;
                             let value = &toml_item.value;
 
-                            let config_title = match &display_info.name {
+                            let config_title = match &section_display_info.name {
                                 Some(name) => name,
                                 None => {
                                     &key.to_string()
@@ -200,23 +132,29 @@ impl<'a> Settings<'a> {
                             Frame::group(ui.style())
                                 .fill(grid_frame_colour.gamma_multiply(1.5))
                                 .show(ui, |ui|{
-                                    ui.heading(config_title);
+                                    ui.heading(RichText::new(config_title).strong());
 
                                     // TODO: Infer type of input widget in Settings widget when type of provided 
                                     // config variable is established (https://github.com/cloudy-org/roseate/issues/75).
-                                    match value {
-                                        Value::String(formatted) => todo!(),
-                                        Value::Integer(formatted) => todo!(),
-                                        Value::Float(formatted) => todo!(),
-                                        Value::Boolean(formatted) => {
-                                            
-                                        },
-                                        Value::Datetime(formatted) => todo!(),
-                                        Value::Array(array) => todo!(),
-                                        Value::InlineTable(inline_table) => todo!(),
-                                    }
 
-                                    ui.label(docstring);
+                                    ui.horizontal(|ui| {
+                                        match section {
+                                            AnySection::String(section) => {},
+                                            AnySection::Bool(section) => {
+                                                ToggleButton::new(&mut section.config_key)
+                                                    .size(Vec2::new(6.0, 3.0))
+                                                    .show(ui);
+                                            },
+                                            AnySection::Int(section) => {},
+                                        }
+
+                                        ui.add_space(3.0);
+
+                                        ui.separator();
+                                        ui.add_space(3.0);
+
+                                        ui.label(docstring);
+                                    });
                                 });
                         }
                     }
@@ -231,4 +169,101 @@ impl<'a> Settings<'a> {
 
     }
 
+    fn walk_and_parse_toml_table(
+        &self,
+        toml_string: &'a str,
+        path: Option<&String>,
+        table: &Table,
+        template_config_items: &mut DocItems
+    ) {
+        for (key, item) in table.iter() {
+            // println!("Key: {}", key);
+
+            let path = match path {
+                Some(path) => &format!("{}.{}", path, key),
+                None => &key.to_string(),
+            };
+
+            match item {
+                Item::None => return,
+                Item::Value(value) => {
+                    let span_start = item.span().map(|s| s.start).expect(
+                        &format!(
+                            "Honestly if this blows up, ooooh noooo my badddd :) - Failed to find item for '{}' \
+                                in toml document that's needed to get the first column the toml key is mentioned!",
+                            path
+                        )
+                    );
+
+                    let line_number = toml_string[..span_start].chars()
+                        .filter(|&char| char == '\n')
+                        .count() + 1;
+
+                    // TODO: parse toml comment above toml key into this var
+                    let docstring = Self::extract_key_docstring(toml_string, line_number);
+
+                    // println!("Line num: {:?}", line_number);
+
+                    template_config_items.insert(
+                        path.to_string(),
+                        (
+                            TomlItem {
+                                key: key.to_string(),
+                                value: value.to_owned()
+                            },
+                            docstring.to_string()
+                        )
+                    );
+                },
+                Item::Table(table) => self.walk_and_parse_toml_table(
+                    toml_string,
+                    Some(path),
+                    table,
+                    template_config_items
+                ),
+                Item::ArrayOfTables(array_of_tables) => {
+                    // TODO: this needs testing!
+
+                    for child_table in array_of_tables {
+                        self.walk_and_parse_toml_table(
+                            toml_string,
+                            Some(path),
+                            child_table,
+                            template_config_items
+                        )
+                    }
+                },
+            }
+        }
+    }
+
+    fn extract_key_docstring(toml_string: &str, key_line_number: usize) -> String {
+        let lines: Vec<&str> = toml_string.lines().collect();
+        let mut doc_lines = Vec::new();
+    
+        // Start from the line above the key
+        let mut index = (key_line_number as isize) - 2; // key_line is 1-based
+
+        while index >= 0 {
+            let line = lines[index as usize].trim_start();
+
+            if line.starts_with('#') {
+                // Remove the leading `#` and any leading space after it
+                let cleaned = line.trim_start_matches('#').trim_start();
+                doc_lines.push(cleaned);
+                index -= 1;
+            } else if line.is_empty() {
+                // Allow empty lines inside the docstring block
+                doc_lines.push("");
+                index -= 1;
+            } else {
+                // Stop if we hit a non-comment, non-empty line
+                break;
+            }
+        }
+
+        // Reverse so the order is top-to-bottom
+        doc_lines.reverse();
+        doc_lines.join("\n")
+    }
 }

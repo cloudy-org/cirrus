@@ -1,11 +1,11 @@
 pub struct Section<'a, T> {
-    config_key: &'a mut T,
+    pub(crate) config_key: &'a mut T,
     pub(crate) config_key_path: String,
 
     pub display_info: SectionDisplayInfo
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct SectionDisplayInfo {
     pub name: Option<String>
 }
@@ -36,6 +36,8 @@ impl<'a, T> Section<'a, T> {
     }
 }
 
+// NOTE: umm do we need more types???
+// We'll add more when necessary as we run into them.
 pub enum AnySection<'a> {
     String(Section<'a, String>),
     Bool(Section<'a, bool>),
