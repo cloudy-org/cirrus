@@ -80,9 +80,11 @@ impl<'a> Settings<'a> {
     pub fn show(&mut self, ctx: &Context, ui: &mut Ui, theme: &Theme) {
         self.update();
 
-        let grid_frame_colour = Color32::from_hex(&theme.secondary_colour.hex_code).unwrap();
-
         ui.vertical_centered(|ui| {
+            ui.set_max_width(ui.available_width().min(900.0));
+
+            let grid_frame_colour = Color32::from_hex(&theme.secondary_colour.hex_code).unwrap();
+
             let grid = Frame::group(&ctx.style())
                 .outer_margin(Margin::same(7))
                 .stroke(Stroke::NONE)
@@ -130,6 +132,7 @@ impl<'a> Settings<'a> {
                             };
 
                             Frame::group(ui.style())
+                                .inner_margin(Margin { left: 12, right: 12, top: 6 , bottom: 8 })
                                 .fill(grid_frame_colour.gamma_multiply(1.5))
                                 .show(ui, |ui|{
                                     ui.heading(RichText::new(config_title).strong());
