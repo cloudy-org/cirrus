@@ -1,3 +1,4 @@
+#[derive(PartialEq, Eq, Hash)]
 pub struct Section<'a, T> {
     pub(crate) config_key: &'a mut T,
     pub(crate) config_key_path: String,
@@ -5,7 +6,7 @@ pub struct Section<'a, T> {
     pub display_info: SectionDisplayInfo
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, PartialEq, Eq, Hash)]
 pub struct SectionDisplayInfo {
     pub name: Option<String>
 }
@@ -38,6 +39,7 @@ impl<'a, T> Section<'a, T> {
 
 // NOTE: umm do we need more types???
 // We'll add more when necessary as we run into them.
+#[derive(PartialEq, Eq, Hash)]
 pub enum AnySection<'a> {
     String(Section<'a, String>),
     Bool(Section<'a, bool>),

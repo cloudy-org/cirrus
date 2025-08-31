@@ -1,14 +1,15 @@
 use std::{collections::HashMap};
 
 use cirrus_theming::v1::Theme;
-use egui::{Color32, Context, CornerRadius, Frame, Margin, RichText, Stroke, Ui, Vec2};
+use egui::{Color32, CornerRadius, Frame, Id, Margin, RichText, Stroke, Ui, Vec2};
+use log::debug;
 use toml_edit::{Document, Item, Table, Value};
 
-use crate::v1::{widgets::{buttons::toggle_button::{ToggleButton}, settings::section::AnySection}};
+use crate::v1::{widgets::settings::section::AnySection, widgets::buttons::toggle_button::ToggleButton};
 
 pub mod section;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct TomlItem {
     key: String,
     value: Value
@@ -18,19 +19,29 @@ type Items<'a> = HashMap<String, TomlItem>;
 type DocItems<'a> = HashMap<String, (TomlItem, String)>;
 
 pub struct Settings<'a> {
-    config_items: Option<Items<'a>>,
-    template_config_items: Option<DocItems<'a>>,
+    id: Id,
 
+    config_items: Option<Items<'a>>,
     template_config_toml_string: &'a str,
 
     sections: Vec<AnySection<'a>>
 }
 
+/// This widget is idempotent, meaning it can be initialized 
+/// on every Egui frame and still handle state persistently and avoid a full re-init.
 impl<'a> Settings<'a> {
-    pub fn new(template_config_toml_string: &'a str) -> Self {
+    pub fn new(template_config_toml_string: &'a str, ui: &Ui) -> Self {
+        let id = ui.make_persistent_id("settings_widget");
+
+        // let config_id = ui.make_persistent_id((id, "config_items"));
+        // let memorized_config_items = ui.memory_mut(
+        //     |mem| mem.data.get_persisted::<Option<Items>>(config_id)
+        // ).unwrap_or_default();
+
         Self {
-            config_items: None,
-            template_config_items: None,
+            id,
+
+            config_items: None, // NOTE: not used yet
             template_config_toml_string,
 
             sections: Vec::new(),
@@ -38,13 +49,24 @@ impl<'a> Settings<'a> {
     }
 
     pub fn add_section<T>(&mut self, section: AnySection<'a>) -> &mut Self {
+        // if self.sections.iter().any(|random_section| *random_section == section) {
+        //     return self;
+        // }
+
         self.sections.push(section);
 
         self
     }
 
-    fn update(&mut self) {
-        if self.template_config_items.is_none() {
+    fn update(&self, ui: &mut Ui) {
+        let template_config_id = ui.make_persistent_id((self.id, "template_config_items"));
+
+        let mut memorized_template_config_items = ui.memory_mut(
+            |mem| mem.data.get_persisted::<Option<DocItems>>(template_config_id)
+        ).unwrap_or_default();
+
+        if memorized_template_config_items.is_none() {
+            debug!("Parsing template config items...");
             let mut template_config_items: DocItems = HashMap::new();
 
             let toml_string = self.template_config_toml_string;
@@ -69,23 +91,30 @@ impl<'a> Settings<'a> {
                 &mut template_config_items
             );
 
-            self.template_config_items = Some(template_config_items);
+            memorized_template_config_items = Some(template_config_items);
         }
+
+        ui.memory_mut(|mem| mem.data.insert_persisted(template_config_id, memorized_template_config_items));
 
         // TODO: then parse the actual user's config and make sure it's always up to date
         // 
         // NOTE: ^ I don't think we need to do that any more, but I'll keep the todo until I'm sure.
     }
 
-    pub fn show(&mut self, ctx: &Context, ui: &mut Ui, theme: &Theme) {
-        self.update();
+    pub fn show_ui(&mut self, ui: &mut Ui, theme: &Theme) {
+        self.update(ui);
+
+        let template_config_id = ui.make_persistent_id((self.id, "template_config_items"));
+        let memorized_template_config_items = ui.memory_mut(
+            |mem| mem.data.get_persisted::<Option<DocItems>>(template_config_id)
+        ).unwrap_or_default();
 
         ui.vertical_centered(|ui| {
             ui.set_max_width(ui.available_width().min(900.0));
 
             let grid_frame_colour = Color32::from_hex(&theme.secondary_colour.hex_code).unwrap();
 
-            let grid = Frame::group(&ctx.style())
+            let grid = Frame::group(&ui.style())
                 .outer_margin(Margin::same(7))
                 .stroke(Stroke::NONE)
                 .fill(grid_frame_colour)
@@ -98,7 +127,7 @@ impl<'a> Settings<'a> {
 
                 // TODO: generate setting fields here deriving from inputted config.template.toml.
 
-                if let Some(template_config_items) = &self.template_config_items {
+                if let Some(template_config_items) = &memorized_template_config_items {
                     for section in &mut self.sections {
                         let (section_display_info, section_config_key_path) = match section {
                             AnySection::String(section) => (section.display_info.clone(), section.config_key_path.clone()),
