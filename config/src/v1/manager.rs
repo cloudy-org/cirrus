@@ -7,7 +7,13 @@ use cirrus_error::v1::error::CError;
 use crate::v1::{config::CConfig, error::Error};
 
 pub struct ConfigManager<T: CConfig> {
-    pub config: T
+    pub config: T,
+}
+
+impl<'a, T: CConfig> Default for ConfigManager<T> {
+    fn default() -> Self {
+        Self { config: Default::default() }
+    }
 }
 
 impl<'a, T: CConfig> ConfigManager<T> {

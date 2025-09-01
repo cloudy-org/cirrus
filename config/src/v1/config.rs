@@ -1,3 +1,3 @@
 use serde::de::DeserializeOwned;
 
-pub trait CConfig: DeserializeOwned {}
+pub trait CConfig: DeserializeOwned + Default {}
