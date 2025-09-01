@@ -9,3 +9,12 @@ pub trait CError {
     /// E.g: `error.detail()`, `error.msg()`
     fn actual_error(&self) -> Option<String>;
 }
+
+impl<E> From<E> for Box<dyn CError>
+where
+    E: CError + 'static,
+{
+    fn from(error: E) -> Self {
+        Box::new(error)
+    }
+}
