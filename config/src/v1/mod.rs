@@ -1,5 +1,4 @@
 pub mod config;
-pub mod manager;
 pub mod error;
 
 /// # ⚠️ WARNING

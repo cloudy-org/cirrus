@@ -4,3 +4,4 @@ pub mod scheduler;
 pub mod notifier;
 pub mod ui_utils;
 pub mod error;
+pub mod config_manager;
