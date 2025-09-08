@@ -1,11 +1,11 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use cirrus_theming::v1::Theme;
-use egui::{Color32, CornerRadius, Frame, Id, Margin, RichText, Stroke, Ui, Vec2};
+use egui::{Color32, CornerRadius, Frame, Id, Margin, RichText, Stroke, Ui};
 use log::debug;
 use toml_edit::{Document, Item, Table, Value};
 
-use crate::v1::{widgets::settings::section::AnySection, widgets::buttons::toggle_button::ToggleButton};
+use crate::v1::widgets::settings::section::AnySection;
 
 pub mod section;
 
@@ -48,7 +48,8 @@ impl<'a> Settings<'a> {
         }
     }
 
-    pub fn add_section<T>(&mut self, section: AnySection<'a>) -> &mut Self {
+    /// ⚠️ No section will be added if the config key does not exist in your `config.template.toml`.
+    pub fn add_section(&mut self, section: AnySection<'a>) -> &mut Self {
         // if self.sections.iter().any(|random_section| *random_section == section) {
         //     return self;
         // }
@@ -99,6 +100,9 @@ impl<'a> Settings<'a> {
         // TODO: then parse the actual user's config and make sure it's always up to date
         // 
         // NOTE: ^ I don't think we need to do that any more, but I'll keep the todo until I'm sure.
+        // 
+        // TODO: (04/09/2025) Remove this when ConfigManager is complete. We don't need to do this 
+        // anymore as ConfigManager will handle keeping the config on disk up to date with ram and vice-versa.
     }
 
     pub fn show_ui(&mut self, ui: &mut Ui, theme: &Theme) {
@@ -115,87 +119,74 @@ impl<'a> Settings<'a> {
             let grid_frame_colour = Color32::from_hex(&theme.secondary_colour.hex_code).unwrap();
 
             let grid = Frame::group(&ui.style())
+                .corner_radius(CornerRadius {nw: 15, ne: 15, sw: 10, se: 10})
                 .outer_margin(Margin::same(7))
                 .stroke(Stroke::NONE)
-                .fill(grid_frame_colour)
-                .corner_radius(CornerRadius::same(15));
+                .fill(grid_frame_colour);
 
             grid.show(ui, |ui| {
                 ui.heading(RichText::new("Settings").strong().size(70.0));
                 ui.add_space(5.0);
                 ui.end_row();
 
-                // TODO: generate setting fields here deriving from inputted config.template.toml.
-
                 if let Some(template_config_items) = &memorized_template_config_items {
                     for section in &mut self.sections {
                         let (section_display_info, section_config_key_path) = match section {
                             AnySection::String(section) => (section.display_info.clone(), section.config_key_path.clone()),
                             AnySection::Bool(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                            AnySection::Int(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                            AnySection::IntTiny(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                            AnySection::IntSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                            AnySection::IntBig(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                            AnySection::FloatSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
                         };
 
                         if let Some((toml_item, docstring)) = template_config_items.get(&section_config_key_path) {
                             let key = &toml_item.key;
-                            let value = &toml_item.value;
+                            // let value = &toml_item.value;
 
                             let config_title = match &section_display_info.name {
-                                Some(name) => name,
+                                Some(name) => name.clone(),
                                 None => {
-                                    &key.to_string()
+                                    let title: &String = &key.to_string()
                                         .replace("_", " ")
                                         .split_whitespace()
                                         .map(|word| {
                                             let mut chars = word.chars();
                                             match chars.next() {
                                                 Some(first_char) => format!(
-                                                    " {}{}",
+                                                    "{}{} ",
                                                     first_char.to_uppercase().collect::<String>(),
                                                     chars.as_str()
                                                 ),
                                                 None => String::new(),
                                             }
                                         })
-                                        .collect()
+                                        .collect();
+
+                                    let mut title = title.clone();
+                                    title.pop();
+
+                                    title
                                 },
                             };
 
+                            let config_docstring = match &section_display_info.description {
+                                Some(description) => description,
+                                None => docstring,
+                            };
+
                             Frame::group(ui.style())
-                                .inner_margin(Margin { left: 12, right: 12, top: 6 , bottom: 8 })
+                                .outer_margin(Margin { top: 7, ..Default::default() })
+                                .inner_margin(Margin { left: 12, right: 12, top: 4, bottom: 8 })
                                 .fill(grid_frame_colour.gamma_multiply(1.5))
                                 .show(ui, |ui|{
-                                    ui.heading(RichText::new(config_title).strong());
-
-                                    // TODO: Infer type of input widget in Settings widget when type of provided 
-                                    // config variable is established (https://github.com/cloudy-org/roseate/issues/75).
-
-                                    ui.horizontal(|ui| {
-                                        match section {
-                                            AnySection::String(section) => {},
-                                            AnySection::Bool(section) => {
-                                                ToggleButton::new(&mut section.config_key)
-                                                    .size(Vec2::new(6.0, 3.0))
-                                                    .show(ui);
-                                            },
-                                            AnySection::Int(section) => {},
-                                        }
-
-                                        ui.add_space(3.0);
-
-                                        ui.separator();
-                                        ui.add_space(3.0);
-
-                                        ui.label(docstring);
-                                    });
+                                    Self::render_section(ui, section, &config_title, config_docstring);
                                 });
+
+                            ui.end_row();
                         }
                     }
                 }
-
-                // ui.label("Second row, first column");
-                // ui.label("Second row, second column");
-                // ui.label("Second row, third column");
-                // ui.end_row();
             });
         });
 
