@@ -1,6 +1,6 @@
-use std::{fmt::Display, ops::RangeInclusive};
+use std::{fmt::Display, hash::Hash, ops::RangeInclusive};
 
-use egui::{emath::Numeric, CursorIcon, RichText, TextEdit, TextStyle, TextWrapMode, Ui, Vec2};
+use egui::{emath::Numeric, CursorIcon, Id, RichText, TextEdit, TextStyle, TextWrapMode, Ui, Vec2};
 
 use crate::v1::{ui_utils::combo_box::ui_strong_selectable_value, widgets::{buttons::toggle_button::ToggleButton, settings::Settings}};
 
@@ -137,21 +137,24 @@ impl Settings<'_> {
                         .show(ui);
                 },
                 AnySection::IntTiny(section) => {
-                    // TODO: add "optional_config.choices" combo box
-
                     let slider_range = match &section.overrides.int_range {
                         Some(int_range) => int_range.clone(),
                         None => u8::MIN..=u8::MAX
                     };
 
-                    ui.scope(|ui| {
-                        // Set slider width to desired widget width
-                        ui.style_mut().spacing.slider_width = desired_widget_size.x;
-
-                        ui.add(
-                            egui::Slider::new(section.config_key, slider_range)
-                        );
-                    });
+                    match &section.overrides.choices {
+                        Some(choices) => Self::render_combo_box(ui, desired_widget_size, choices.clone(), section),
+                        None => {
+                            ui.scope(|ui| {
+                                // Set slider width to desired widget width
+                                ui.style_mut().spacing.slider_width = desired_widget_size.x;
+        
+                                ui.add(
+                                    egui::Slider::new(section.config_key, slider_range)
+                                );
+                            });
+                        }
+                    };
                 },
                 AnySection::IntSmall(section) => Self::render_int_drag_value(ui, desired_widget_size, section),
                 AnySection::FloatSmall(section) => Self::render_int_drag_value(ui, desired_widget_size, section),
@@ -174,8 +177,14 @@ impl Settings<'_> {
         ui.scope(|ui| {
             ui.style_mut().spacing.interact_size.y = desired_widget_size.y;
 
-            // TODO: test if this id conflicts when multiple combo boxes are rendered.
-            egui::ComboBox::from_id_salt(ui.id().with("selection_choices")) 
+            // NOTE: hopefully developers don't decide to apply more than one section 
+            // with the same config key and also decide to render a combo box on both of them 
+            // in the future, as if they do... they will be met with a lovely surprise (YOU CAN'T!).
+            let combo_box_id = ui.id()
+                .with("selection_choices")
+                .with(&section.config_key_path);
+
+            egui::ComboBox::from_id_salt(combo_box_id) 
                 .selected_text(RichText::new(format!("{:#}", section.config_key)).heading())
                 .width(desired_widget_size.x)
                 .show_ui(ui, |ui| {
@@ -194,7 +203,7 @@ impl Settings<'_> {
         });
     }
 
-    fn render_int_drag_value<N: Numeric>(ui: &mut Ui, desired_widget_size: Vec2, section: &mut Section<'_, N>) {
+    fn render_int_drag_value<N: Numeric + Display>(ui: &mut Ui, desired_widget_size: Vec2, section: &mut Section<'_, N>) {
         // TODO: add "optional_config.choices" combo box
 
         let range = match &section.overrides.int_range {
@@ -202,24 +211,29 @@ impl Settings<'_> {
             None => N::MIN..=N::MAX
         };
 
-        ui.scope(|ui| {
-            // I think this is the only way to make the drag value text bigger.
-            ui.style_mut().drag_value_text_style = TextStyle::Heading;
-
-            // TODO: turn drag value into a custom cirrus egui widget.
-            let response = ui.add_sized(
-                desired_widget_size,
-                egui::DragValue::new(section.config_key)
-                    .range(range)
-                    .speed(0.2)
-            );
-
-            let cursor_icon = match response.dragged() {
-                true => CursorIcon::ResizeHorizontal,
-                false => CursorIcon::Text
-            };
-
-            response.on_hover_cursor(cursor_icon);
-        });
+        match &section.overrides.choices {
+            Some(choices) => Self::render_combo_box(ui, desired_widget_size, choices.clone(), section),
+            None => {
+                ui.scope(|ui| {
+                    // I think this is the only way to make the drag value text bigger.
+                    ui.style_mut().drag_value_text_style = TextStyle::Heading;
+        
+                    // TODO: turn drag value into a custom cirrus egui widget.
+                    let response = ui.add_sized(
+                        desired_widget_size,
+                        egui::DragValue::new(section.config_key)
+                            .range(range)
+                            .speed(0.2)
+                    );
+        
+                    let cursor_icon = match response.dragged() {
+                        true => CursorIcon::ResizeHorizontal,
+                        false => CursorIcon::Text
+                    };
+        
+                    response.on_hover_cursor(cursor_icon);
+                });
+            }
+        };
     }
 }
