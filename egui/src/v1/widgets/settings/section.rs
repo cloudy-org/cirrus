@@ -1,6 +1,6 @@
-use std::{fmt::Display, hash::Hash, ops::RangeInclusive};
+use std::{fmt::Display, ops::RangeInclusive};
 
-use egui::{emath::Numeric, CursorIcon, Id, RichText, TextEdit, TextStyle, TextWrapMode, Ui, Vec2};
+use egui::{emath::Numeric, CursorIcon, RichText, TextEdit, TextStyle, TextWrapMode, Ui, Vec2};
 
 use crate::v1::{ui_utils::combo_box::ui_strong_selectable_value, widgets::{buttons::toggle_button::ToggleButton, settings::Settings}};
 
