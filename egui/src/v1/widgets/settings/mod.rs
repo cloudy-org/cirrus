@@ -48,7 +48,6 @@ impl<'a> Settings<'a> {
         }
     }
 
-    /// ⚠️ No section will be added if the config key does not exist in your `config.template.toml`.
     pub fn add_section<T: Into<AnySection<'a>>>(&mut self, section: T) -> &mut Self {
         // if self.sections.iter().any(|random_section| *random_section == section) {
         //     return self;
