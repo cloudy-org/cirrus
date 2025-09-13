@@ -1,6 +1,6 @@
 use std::{fmt::Display, ops::RangeInclusive};
 
-use egui::{emath::Numeric, CursorIcon, RichText, TextStyle, TextWrapMode, Ui, Vec2};
+use egui::{emath::Numeric, CursorIcon, RichText, TextEdit, TextStyle, TextWrapMode, Ui, Vec2};
 
 use crate::v1::{ui_utils::combo_box::ui_strong_selectable_value, widgets::{buttons::toggle_button::ToggleButton, settings::Settings}};
 
@@ -122,7 +122,7 @@ impl Settings<'_> {
                         Some(choices) => Self::render_combo_box(ui, desired_widget_size, choices.clone(), section),
                         None => {
                             ui.add(
-                                egui::TextEdit::multiline(section.config_key)
+                                TextEdit::multiline(section.config_key)
                                     .desired_width(desired_widget_size.x + 100.0)
                                     .hint_text(text_edit_placeholder)
                                     .font(TextStyle::Heading)
@@ -171,19 +171,27 @@ impl Settings<'_> {
     }
 
     fn render_combo_box<T: PartialEq + Display>(ui: &mut Ui, desired_widget_size: Vec2, choices: Vec<T>, section: &mut Section<'_, T>) {
-        ui.style_mut().spacing.interact_size.y = desired_widget_size.y;
+        ui.scope(|ui| {
+            ui.style_mut().spacing.interact_size.y = desired_widget_size.y;
 
-        // TODO: test if this id conflicts when multiple combo boxes are rendered.
-        egui::ComboBox::from_id_salt(ui.id().with("selection_choices")) 
-            .selected_text(RichText::new(format!("{:#}", section.config_key)).heading())
-            .width(desired_widget_size.x)
-            .show_ui(ui, |ui| {
-                for choice in choices {
-                    let choice_display = format!("{:#}", choice);
-                    ui_strong_selectable_value::<T>(ui, section.config_key, choice, choice_display);
+            // TODO: test if this id conflicts when multiple combo boxes are rendered.
+            egui::ComboBox::from_id_salt(ui.id().with("selection_choices")) 
+                .selected_text(RichText::new(format!("{:#}", section.config_key)).heading())
+                .width(desired_widget_size.x)
+                .show_ui(ui, |ui| {
+                    for choice in choices {
+                        let choice_display = format!("{:#}", choice);
+
+                        ui_strong_selectable_value::<T>(
+                            ui,
+                            section.config_key,
+                            choice,
+                            RichText::new(choice_display).heading()
+                        );
+                    }
                 }
-            }
-        );        
+            );
+        });
     }
 
     fn render_int_drag_value<N: Numeric>(ui: &mut Ui, desired_widget_size: Vec2, section: &mut Section<'_, N>) {
