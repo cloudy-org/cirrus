@@ -5,7 +5,7 @@ use egui::{Color32, CornerRadius, Frame, Id, Margin, RichText, Stroke, Ui};
 use log::debug;
 use toml_edit::{Document, Item, Table, Value};
 
-use crate::v1::widgets::settings::section::AnySection;
+use crate::v1::widgets::settings::section::{AnySection};
 
 pub mod section;
 
@@ -49,12 +49,12 @@ impl<'a> Settings<'a> {
     }
 
     /// ⚠️ No section will be added if the config key does not exist in your `config.template.toml`.
-    pub fn add_section(&mut self, section: AnySection<'a>) -> &mut Self {
+    pub fn add_section<T: Into<AnySection<'a>>>(&mut self, section: T) -> &mut Self {
         // if self.sections.iter().any(|random_section| *random_section == section) {
         //     return self;
         // }
 
-        self.sections.push(section);
+        self.sections.push(section.into());
 
         self
     }
@@ -95,7 +95,9 @@ impl<'a> Settings<'a> {
             memorized_template_config_items = Some(template_config_items);
         }
 
-        ui.memory_mut(|mem| mem.data.insert_persisted(template_config_id, memorized_template_config_items));
+        ui.memory_mut(
+            |mem| mem.data.insert_persisted(template_config_id, memorized_template_config_items)
+        );
 
         // TODO: then parse the actual user's config and make sure it's always up to date
         // 
@@ -124,30 +126,43 @@ impl<'a> Settings<'a> {
                 .stroke(Stroke::NONE)
                 .fill(grid_frame_colour);
 
-            grid.show(ui, |ui| {
-                ui.heading(RichText::new("Settings").strong().size(70.0));
-                ui.add_space(5.0);
-                ui.end_row();
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                grid.show(ui, |ui| {
+                    ui.heading(RichText::new("Settings").strong().size(70.0));
+                    ui.add_space(5.0);
+                    ui.end_row();
 
-                if let Some(template_config_items) = &memorized_template_config_items {
-                    for section in &mut self.sections {
-                        let (section_display_info, section_config_key_path) = match section {
-                            AnySection::String(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                            AnySection::Bool(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                            AnySection::IntTiny(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                            AnySection::IntSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                            AnySection::IntBig(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                            AnySection::FloatSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                        };
+                    if let Some(template_config_items) = &memorized_template_config_items {
+                        for section in &mut self.sections {
+                            let (section_display_info, section_config_key_path) = match section {
+                                AnySection::String(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                                AnySection::Bool(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                                AnySection::IntTiny(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                                AnySection::IntSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                                AnySection::IntBig(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                                AnySection::FloatSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
+                            };
 
-                        if let Some((toml_item, docstring)) = template_config_items.get(&section_config_key_path) {
-                            let key = &toml_item.key;
-                            // let value = &toml_item.value;
+                            let (toml_config_key, config_docstring) = match template_config_items.get(&section_config_key_path) {
+                                None => (
+                                    &section_config_key_path.split(".").last().expect(
+                                        "Failed to split section config key path! This is odd as the \
+                                        'config_key_path!()' macro should always return a dotted key path."
+                                    ).to_string(),
+                                    &section_display_info.description.unwrap_or_default()
+                                ),
+                                Some((toml_item, docstring)) => {
+                                    let key = &toml_item.key;
+                                    // let value = &toml_item.value;
+    
+                                    (key, docstring)
+                                }
+                            };
 
                             let config_title = match &section_display_info.name {
                                 Some(name) => name.clone(),
                                 None => {
-                                    let title: &String = &key.to_string()
+                                    let title: &String = &toml_config_key
                                         .replace("_", " ")
                                         .split_whitespace()
                                         .map(|word| {
@@ -162,17 +177,12 @@ impl<'a> Settings<'a> {
                                             }
                                         })
                                         .collect();
-
+                    
                                     let mut title = title.clone();
                                     title.pop();
-
+                    
                                     title
                                 },
-                            };
-
-                            let config_docstring = match &section_display_info.description {
-                                Some(description) => description,
-                                None => docstring,
                             };
 
                             Frame::group(ui.style())
@@ -186,10 +196,9 @@ impl<'a> Settings<'a> {
                             ui.end_row();
                         }
                     }
-                }
+                });
             });
         });
-
     }
 
     fn walk_and_parse_toml_table(

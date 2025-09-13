@@ -1,6 +1,6 @@
 use std::{fmt::Display, ops::RangeInclusive};
 
-use egui::{emath::Numeric, CursorIcon, RichText, TextStyle, Ui, Vec2};
+use egui::{emath::Numeric, CursorIcon, RichText, TextStyle, TextWrapMode, Ui, Vec2};
 
 use crate::v1::{ui_utils::combo_box::ui_strong_selectable_value, widgets::{buttons::toggle_button::ToggleButton, settings::Settings}};
 
@@ -8,13 +8,15 @@ pub struct Section<'a, T> {
     pub(crate) config_key: &'a mut T,
     pub(crate) config_key_path: String,
 
-    pub optional_config: SectionOptionalConfig<'a, T>,
+    pub overrides: SectionOverrides<'a, T>,
 
     pub display_info: SectionDisplayInfo
 }
 
+/// Struct that allows the developer to override and customize 
+/// default values and **constraints** that would be set by section widgets.
 #[derive(Default)]
-pub struct SectionOptionalConfig<'a, T> {
+pub struct SectionOverrides<'a, T> {
     pub choices: Option<Vec<T>>,
     pub int_range: Option<RangeInclusive<T>>,
     pub text_edit_placeholder: Option<&'a str>
@@ -30,13 +32,13 @@ impl<'a, T> Section<'a, T> {
     pub fn new(
         config_key_path: &'a str,
         config_key: &'a mut T,
-        optional_config: SectionOptionalConfig<'a, T>,
+        overrides: SectionOverrides<'a, T>,
         display_info: SectionDisplayInfo
     ) -> Self {
         Self {
             config_key,
             config_key_path: Self::strip_and_parse_config_key_path(config_key_path.to_string()),
-            optional_config,
+            overrides,
             display_info,
         }
     }
@@ -111,12 +113,12 @@ impl Settings<'_> {
 
             match section {
                 AnySection::String(section) => {
-                    let text_edit_placeholder = match &section.optional_config.text_edit_placeholder {
+                    let text_edit_placeholder = match &section.overrides.text_edit_placeholder {
                         Some(placeholder) => placeholder,
                         None => "Enter string here..."
                     };
 
-                    match &section.optional_config.choices {
+                    match &section.overrides.choices {
                         Some(choices) => Self::render_combo_box(ui, desired_widget_size, choices.clone(), section),
                         None => {
                             ui.add(
@@ -137,7 +139,7 @@ impl Settings<'_> {
                 AnySection::IntTiny(section) => {
                     // TODO: add "optional_config.choices" combo box
 
-                    let slider_range = match &section.optional_config.int_range {
+                    let slider_range = match &section.overrides.int_range {
                         Some(int_range) => int_range.clone(),
                         None => u8::MIN..=u8::MAX
                     };
@@ -161,7 +163,10 @@ impl Settings<'_> {
             ui.separator();
             ui.add_space(3.0);
 
-            ui.label(config_docstring);
+            ui.add(
+                egui::Label::new(config_docstring)
+                    .wrap_mode(TextWrapMode::Wrap)
+            );
         });
     }
 
@@ -184,7 +189,7 @@ impl Settings<'_> {
     fn render_int_drag_value<N: Numeric>(ui: &mut Ui, desired_widget_size: Vec2, section: &mut Section<'_, N>) {
         // TODO: add "optional_config.choices" combo box
 
-        let range = match &section.optional_config.int_range {
+        let range = match &section.overrides.int_range {
             Some(int_range) => int_range.clone(),
             None => N::MIN..=N::MAX
         };
