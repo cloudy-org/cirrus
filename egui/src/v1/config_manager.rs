@@ -39,6 +39,9 @@ impl<'a, T: CConfig> ConfigManager<T> {
         )
     }
 
+    /// Writes the mutated config we currently have in memory to the user's config file in disk.
+    pub fn save() {}
+
     pub fn update(&mut self, ctx: &Context) {
         if self.config_autosave_schedule.update().is_some() {
             self.config_autosave_schedule = new_autosave_scheduler!();
