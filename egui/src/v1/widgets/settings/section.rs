@@ -30,29 +30,17 @@ pub struct SectionDisplayInfo {
 
 impl<'a, T> Section<'a, T> {
     pub fn new(
-        config_key_path: &'a str,
+        config_key_path: String,
         config_key: &'a mut T,
         overrides: SectionOverrides<'a, T>,
         display_info: SectionDisplayInfo
     ) -> Self {
         Self {
             config_key,
-            config_key_path: Self::strip_and_parse_config_key_path(config_key_path.to_string()),
+            config_key_path,
             overrides,
             display_info,
         }
-    }
-
-    fn strip_and_parse_config_key_path(config_key_path: String) -> String {
-        let formatted_key_path = config_key_path
-            .replace("self.", "");
-
-        let mut split_key_path = formatted_key_path.split(".");
-
-        // we're consuming the root to get rid of the path's prefix ("config.").
-        split_key_path.next(); 
-
-        split_key_path.collect::<Vec<&str>>().join(".")
     }
 }
 
@@ -204,8 +192,6 @@ impl Settings<'_> {
     }
 
     fn render_int_drag_value<N: Numeric + Display>(ui: &mut Ui, desired_widget_size: Vec2, section: &mut Section<'_, N>) {
-        // TODO: add "optional_config.choices" combo box
-
         let range = match &section.overrides.int_range {
             Some(int_range) => int_range.clone(),
             None => N::MIN..=N::MAX

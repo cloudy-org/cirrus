@@ -26,11 +26,21 @@ pub mod error;
 #[macro_export] macro_rules! config_key_path {
     ($base:ident . $($rest:tt)*) => {{
         // The only reason we're doing this below is so we reference the 
-        // parameter, in turn tricking the rust compiler to do actual strict type 
-        // checking on the key path to avoid incorrect or non-existence config paths.
+        // parameter, in turn tricking the rust compiler to do real strict type 
+        // checking on the key path to avoid developers from inserting 
+        // incorrect or non-existence config paths, pretty cool.
         let _ = &$base.$($rest)*;
 
-        // Step 2: return the path as string
-        stringify!($base.$($rest)*)
+        let config_key_path = stringify!($base.$($rest)*);
+
+        let formatted_key_path = config_key_path
+            .replace("self.", "");
+
+        let mut split_key_path = formatted_key_path.split(".");
+
+        // we're consuming the root to get rid of the path's prefix ("config.").
+        split_key_path.next(); 
+
+        split_key_path.collect::<Vec<&str>>().join(".")
     }};
 }
