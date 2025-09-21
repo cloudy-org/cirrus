@@ -1,4 +1,4 @@
-use std::{fs, hash::{DefaultHasher, Hasher}, time::Duration};
+use std::{fs, hash::{DefaultHasher, Hasher}, path::PathBuf, time::Duration};
 
 use cirrus_config::v1::{config::{get_and_create_config_file, CConfig}, error::Error as ConfigError};
 use cirrus_error::v1::error::CError;
@@ -6,17 +6,18 @@ use cirrus_path::v1::get_user_config_dir_path;
 use egui::Context;
 use egui_notify::ToastLevel;
 use log::debug;
-use toml_edit::{Document, DocumentMut, Item, Table};
+use toml_edit::{Document, DocumentMut, Formatted, Item, Table, Value};
 
-use crate::v1::{notifier::Notifier, scheduler::Scheduler};
+use crate::v1::{error::Error, notifier::Notifier, scheduler::Scheduler};
 
 pub struct ConfigManager<T: CConfig> {
     pub config: T,
     last_config_hash: u64,
 
+    config_path: Option<PathBuf>,
     config_disk_string_copy: Option<String>,
 
-    config_autosave_schedule: Option<Scheduler>
+    config_autosave_schedule: Option<Scheduler>,
 }
 
 impl<'a, T: CConfig> Default for ConfigManager<T> {
@@ -24,6 +25,7 @@ impl<'a, T: CConfig> Default for ConfigManager<T> {
         Self {
             config: Default::default(),
             last_config_hash: 0, // hopefully this doesn't break any logic I'm about to write
+            config_path: None,
             config_disk_string_copy: None,
             config_autosave_schedule: None
         }
@@ -43,13 +45,14 @@ impl<'a, T: CConfig> ConfigManager<T> {
         // Reading the config here really shouldn't fail as that would be caught by 
         // "get_and_create_config_file" but I guess just to be extra safe and panic-less 
         // let's map it to the same exact error.
-        let copy_of_config_on_disk = fs::read_to_string(config_path)
+        let copy_of_config_on_disk = fs::read_to_string(&config_path)
             .map_err(|error| ConfigError::FailedToReadConfig(error.to_string()))?;
 
         Ok(
             Self {
                 config,
                 last_config_hash: config_hash,
+                config_path: Some(config_path),
                 config_disk_string_copy: Some(copy_of_config_on_disk),
                 config_autosave_schedule: None
             }
@@ -87,12 +90,14 @@ impl<'a, T: CConfig> ConfigManager<T> {
     }
 
     /// Writes the mutated config we currently have in memory to the user's config file in disk.
-    pub fn save(&self) -> Result<(), Box<dyn CError>> {
+    pub fn save(&mut self) -> Result<(), Box<dyn CError>> {
         debug!("Saving mutated config to disk...");
 
         // TODO: now we need to make sure when a user updates the disk variant of 
         // the config we have a watchdog that tells us so we can update our disk copy.
-        if let Some(config_disk_copy) = &self.config_disk_string_copy {
+        if let (Some(ref mut config_disk_copy), Some(config_path)) = (
+            &mut self.config_disk_string_copy, &self.config_path
+        ) {
             debug!("Serializing config in memory into a string to prepare for walking and editing disk config...");
 
             // I'm expecting here as the in memory config should really be safe from 
@@ -108,22 +113,22 @@ impl<'a, T: CConfig> ConfigManager<T> {
             let mut config_to_write_to_disk_document = config_disk_copy.parse::<DocumentMut>().unwrap();
 
             debug!("Walking and editing disk toml document...");
-            self.walk_and_edit_toml_document(
+            Self::walk_and_edit_toml_document(
                 &updated_config_document,
                 None,
                 &mut config_to_write_to_disk_document
             );
 
-            println!("DISK CONFIG -> {}", config_to_write_to_disk_document);
+            *config_disk_copy = config_to_write_to_disk_document.to_string();
 
-            // TODO: write to config in disk
+            fs::write(config_path, config_disk_copy)
+                .map_err(|error| Error::FailedToSaveConfig(error.to_string()))?;
         }
 
         Ok(())
     }
 
     fn walk_and_edit_toml_document(
-        &self,
         table_to_walk: &Table,
         key_path: Option<&String>,
         document_to_edit: &mut DocumentMut
@@ -137,44 +142,80 @@ impl<'a, T: CConfig> ConfigManager<T> {
             match item {
                 Item::None => return,
                 Item::Value(value) => {
-                    let previous_item = Self::get_toml_item_by_path(&document_to_edit, key_path).unwrap();
+                    let previous_item_value = match Self::get_toml_item_by_path(&document_to_edit, key_path) {
+                        Some(previous_item) => previous_item.as_value().unwrap(),
+                        None => &Value::String(Formatted::new(String::default())),
+                    };
 
-                    let string_value = item.to_string();
-                    let previous_string_value = previous_item.to_string();
+                    let is_different = match (value, previous_item_value) {
+                        (Value::String(formatted_a), Value::String(formatted_b)) => formatted_a.value() != formatted_b.value(),
+                        (Value::Integer(formatted_a), Value::Integer(formatted_b)) => formatted_a.value() != formatted_b.value(),
+                        (Value::Float(formatted_a), Value::Float(formatted_b)) => formatted_a.value() != formatted_b.value(),
+                        (Value::Boolean(formatted_a), Value::Boolean(formatted_b)) => formatted_a.value() != formatted_b.value(),
+                        (Value::Datetime(formatted_a), Value::Datetime(formatted_b)) => formatted_a.value() != formatted_b.value(),
+                        _ => true
+                    };
 
-                    if string_value != previous_string_value {
-                        document_to_edit[key] = Item::Value(value.clone());
+                    if is_different {
+                        // NOTE: very experimental, this will need a lot of testing
+                        Self::edit_toml_item_by_path(
+                            document_to_edit,
+                            key_path,
+                            Item::Value(value.clone())
+                        );
                     }
                 },
                 Item::Table(table) => {
-                    self.walk_and_edit_toml_document(table, Some(key_path), document_to_edit);
+                    Self::walk_and_edit_toml_document(table, Some(key_path), document_to_edit);
                 },
                 Item::ArrayOfTables(array_of_tables) => {
                     // TODO: this needs testing!
 
                     for child_table in array_of_tables {
-                        self.walk_and_edit_toml_document(
+                        Self::walk_and_edit_toml_document(
                             child_table, Some(key_path), document_to_edit
                         );
                     }
-
                 },
             }
         }
     }
 
     fn get_toml_item_by_path(document: &'a DocumentMut, key_path: &String) -> Option<&'a Item> {
-        let mut document: &Item = document.as_item();
+        let mut item: &Item = document.as_item();
 
         for part in key_path.split('.') {
-            if let Some(table_like) = document.as_table_like() {
-                document = table_like.get(part)?;
+            if let Some(table_like) = item.as_table_like() {
+                item = table_like.get(part)?;
             } else {
                 return None;
             }
         }
 
-        Some(document)
+        Some(item)
+    }
+
+    // NOTE: very experimental, this will need a lot of testing
+    fn edit_toml_item_by_path(document: &mut DocumentMut, key_path: &str, item_value: Item) {
+        debug!("Editing toml key '{}' with value '{}'...", key_path, item_value);
+
+        let mut item_to_edit = document.as_item_mut();
+
+        for part in key_path.split('.') {
+            match item_to_edit.as_table_like_mut() {
+                Some(table_like) => {
+                    match table_like.get_mut(part) {
+                        Some(new_item) => {
+                            item_to_edit = new_item
+                        },
+                        None => return
+                    }
+                },
+                None => return
+            }
+        }
+
+        *item_to_edit = item_value;
     }
 
     // fn is_toml_value_different(value_a: &Value, value_b: &Value) -> bool {
