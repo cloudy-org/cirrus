@@ -44,7 +44,7 @@ impl Notifier {
                 let human_message = error.human_message();
 
                 let log_message = match error.actual_error() {
-                    Some(actual_error) => format!("{} \nActual Error: {}", human_message, actual_error),
+                    Some(actual_error) => format!("{} \nActual Error: {}", human_message.replace("\n\n", "\n"), actual_error),
                     None => human_message.clone(),
                 };
 
