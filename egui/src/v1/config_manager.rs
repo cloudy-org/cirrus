@@ -59,7 +59,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
         )
     }
 
-    pub fn update<E: CError>(&mut self, ctx: &Context, notifier: &mut Notifier<E>) {
+    pub fn update(&mut self, ctx: &Context, notifier: &mut Notifier) {
         if self.config_autosave_schedule.is_none() {
             self.config_autosave_schedule = Some(Scheduler::new(|| {}, Duration::from_secs(4)));
         }
@@ -73,20 +73,33 @@ impl<'a, T: CConfig> ConfigManager<T> {
                 let current_config_hash = hasher.finish();
 
                 if current_config_hash != self.last_config_hash {
-                    self.save(); // TODO: handle errors in result
+                    let result = self.save(); // TODO: handle errors in result
 
-                    notifier.toast(
-                        "Config has been autosaved!",
-                        ToastLevel::Success,
-                        |_| {}
-                    );
+                    match result {
+                        Ok(_) => {
+                            notifier.toast(
+                                "Config has been autosaved!",
+                                ToastLevel::Success,
+                                |_| {}
+                            );
+                        },
+                        Err(error) => {
+                            // TODO: we need to check if these errors are readable enough
+                            notifier.toast(error, ToastLevel::Error, |_| {});
+                        }
+                    }
 
                     self.last_config_hash = current_config_hash;
                 }
 
-                self.config_autosave_schedule = Some(Scheduler::new(|| {}, Duration::from_secs(4)));
+                self.config_autosave_schedule = None;
             }
         };
+
+        // We need to request a repaint at least every second to keep the auto 
+        // save schedule going when the user stops interacting with the application 
+        // (user stops interacting = no egui update / repaint).
+        ctx.request_repaint_after_secs(0.5);
     }
 
     /// Writes the mutated config we currently have in memory to the user's config file in disk.
@@ -121,7 +134,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
 
             *config_disk_copy = config_to_write_to_disk_document.to_string();
 
-            fs::write(config_path, config_disk_copy)
+            fs::write("/343/434343/433/test", config_disk_copy)
                 .map_err(|error| Error::FailedToSaveConfig(error.to_string()))?;
         }
 

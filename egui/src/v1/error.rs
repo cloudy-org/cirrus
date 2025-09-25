@@ -14,8 +14,8 @@ pub enum Error {
 impl CError for Error {
     fn human_message(&self) -> String {
         match self {
-            Error::FailedToSaveConfig(actual_error) => format!("Failed to save config toml file! Error: {}", actual_error),
-        }.to_string()
+            Error::FailedToSaveConfig(actual_error) => format!("Failed to save config toml file! \n\nError: {}", actual_error),
+        }
     }
 
     fn actual_error(&self) -> Option<String> {
