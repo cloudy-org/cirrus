@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
+use cirrus_config::v1::config::CConfig;
 use cirrus_theming::v1::Theme;
-use egui::{Color32, CornerRadius, Frame, Id, Margin, RichText, Stroke, Ui};
+use egui::{Color32, Context, CornerRadius, Frame, Id, Key, Margin, RichText, Stroke, Ui};
+use egui_notify::ToastLevel;
 use log::debug;
 use toml_edit::{Document, Item, Table, Value};
 
-use crate::v1::widgets::settings::section::{AnySection};
+use crate::v1::{config_manager::{ConfigManager}, notifier::Notifier, widgets::settings::section::AnySection};
 
 pub mod section;
 
@@ -56,6 +58,43 @@ impl<'a> Settings<'a> {
         self.sections.push(section.into());
 
         self
+    }
+
+    /// Handles settings panel open and closing input as well as saving config on exit.
+    pub fn handle_input<T: CConfig>(
+        ctx: &Context,
+        config_manager: &mut ConfigManager<T>,
+        notifier: &mut Notifier,
+        show_state: &mut bool
+    ) {
+        let mut save_and_toast = || {
+            match config_manager.save_if_changed() {
+                Ok(changed) => {
+                    if changed {
+                        notifier.toast("Config changes saved!", ToastLevel::Success, |_| {});
+                    }
+                },
+                Err(error) => {
+                    notifier.toast(error, ToastLevel::Error, |_| {});
+                }
+            }
+        };
+
+        if ctx.input(|input| input.key_pressed(Key::Escape)) && *show_state {
+            *show_state = false;
+
+            save_and_toast();
+        }
+
+        // TODO: make this key bind customizable via the 
+        // config in the future when we have a good key binds system.
+        if ctx.input(|i| i.modifiers.ctrl && i.key_pressed(Key::Comma)) {
+            *show_state = !*show_state;
+
+            if *show_state == false {
+                save_and_toast();
+            }
+        }
     }
 
     fn update(&self, ui: &mut Ui) {

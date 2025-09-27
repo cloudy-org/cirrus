@@ -44,8 +44,8 @@ impl<'a, T> Section<'a, T> {
     }
 }
 
-// NOTE: umm do we need more types???
-// We'll add more when necessary as we run into them.
+// NOTE: umm do we need more types??? We'll add more when necessary as we run into them.
+// TODO: Add support for "ChildSections" that allows for multiple sections under a section.
 pub enum AnySection<'a> {
     String(Section<'a, String>),
     Bool(Section<'a, bool>),

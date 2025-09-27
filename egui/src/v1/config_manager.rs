@@ -66,30 +66,21 @@ impl<'a, T: CConfig> ConfigManager<T> {
 
         if let Some(ref mut config_autosave_schedule) = &mut self.config_autosave_schedule {
             if config_autosave_schedule.update().is_some() {
-                // We're using hashes to detect changes to the config struct.
-                let mut hasher = DefaultHasher::new();
-                self.config.hash(&mut hasher);
+                let result = self.save_if_changed();
 
-                let current_config_hash = hasher.finish();
-
-                if current_config_hash != self.last_config_hash {
-                    let result = self.save(); // TODO: handle errors in result
-
-                    match result {
-                        Ok(_) => {
+                match result {
+                    Ok(changed) => {
+                        if changed {
                             notifier.toast(
                                 "Config has been autosaved!",
                                 ToastLevel::Success,
                                 |_| {}
                             );
-                        },
-                        Err(error) => {
-                            // TODO: we need to check if these errors are readable enough
-                            notifier.toast(error, ToastLevel::Error, |_| {});
                         }
+                    },
+                    Err(error) => {
+                        notifier.toast(error, ToastLevel::Error, |_| {});
                     }
-
-                    self.last_config_hash = current_config_hash;
                 }
 
                 self.config_autosave_schedule = None;
@@ -100,6 +91,26 @@ impl<'a, T: CConfig> ConfigManager<T> {
         // save schedule going when the user stops interacting with the application 
         // (user stops interacting = no egui update / repaint).
         ctx.request_repaint_after_secs(0.5);
+    }
+
+    /// Only attempts to save config if there was a change.
+    pub fn save_if_changed(&mut self) -> Result<bool, Box<dyn CError>> {
+        // We're using hashes to detect changes to the config struct.
+        let mut hasher = DefaultHasher::new();
+        self.config.hash(&mut hasher);
+
+        let current_config_hash = hasher.finish();
+
+        match current_config_hash != self.last_config_hash {
+            true => {
+                self.save()?;
+
+                self.last_config_hash = current_config_hash;
+
+                Ok(true)
+            },
+            false => Ok(false)
+        }
     }
 
     /// Writes the mutated config we currently have in memory to the user's config file in disk.
@@ -134,7 +145,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
 
             *config_disk_copy = config_to_write_to_disk_document.to_string();
 
-            fs::write("/343/434343/433/test", config_disk_copy)
+            fs::write(config_path, config_disk_copy)
                 .map_err(|error| Error::FailedToSaveConfig(error.to_string()))?;
         }
 
