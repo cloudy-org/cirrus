@@ -1,0 +1,10 @@
+[package]
+name = "cirrus_path"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cirrus_error = { path = "../error"}
+
+log = "0.4"
+dirs = "6.0"

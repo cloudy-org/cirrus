@@ -4,12 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-cirrus_error = { path = "../error"}
-cirrus_theming = { path = "../theming"}
+cirrus_error = { path = "../error" }
+cirrus_config = { path = "../config" }
+cirrus_theming = { path = "../theming" }
+cirrus_path = { path = "../path" }
 
 log = "0.4"
-toml = "0.8"
-egui = { version = "0.32" }
+toml = "0.9"
+toml_edit = "0.23"
+egui = "0.32"
 textwrap = "0.16"
-egui-notify = { git = "https://github.com/THEGOLDENPRO/egui-notify-0.20.0.git" }
+egui-notify = "0.20"
 serde = { version = "1.0", features = ["derive"] }

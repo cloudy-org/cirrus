@@ -1,9 +1,8 @@
-use std::{marker::PhantomData, sync::{Arc, RwLock}, time::Duration};
+use std::{sync::{Arc, RwLock}, time::Duration};
 
+use cirrus_error::v1::error::CError;
 use egui::Context;
 use egui_notify::{Toast, ToastLevel, Toasts};
-
-use crate::v1::error::EguiCError;
 
 #[derive(Clone, Default)]
 pub struct Loading {
@@ -12,24 +11,20 @@ pub struct Loading {
 
 /// A neat way to inform / notify the user of what is going on in your backend with Egui.
 #[derive(Clone)]
-pub struct Notifier<E: EguiCError> {
+pub struct Notifier {
     /// Is anything loading? `None` = nothing is loading.
     pub loading: Option<Loading>,
     pub toasts: Arc<RwLock<Toasts>>,
 
     loading_lock: Arc<RwLock<Option<Loading>>>,
-
-    _owo: PhantomData<E>,
 }
 
-impl<E: EguiCError> Notifier<E> {
+impl Notifier {
     pub fn new() -> Self {
         Self {
             loading: None,
             loading_lock: Arc::new(RwLock::new(None)),
             toasts: Arc::new(RwLock::new(Toasts::default())),
-
-            _owo: PhantomData
         }
     }
 
@@ -43,13 +38,13 @@ impl<E: EguiCError> Notifier<E> {
         }
     }
 
-    pub fn toast(&self, text: impl Into<StringOrError<E>>, level: ToastLevel, toast_mutator: impl FnOnce(&mut Toast)) {
+    pub fn toast(&self, text: impl Into<StringOrError>, level: ToastLevel, toast_mutator: impl FnOnce(&mut Toast)) {
         let text = match text.into() {
             StringOrError::Error(error) => {
                 let human_message = error.human_message();
 
                 let log_message = match error.actual_error() {
-                    Some(actual_error) => format!("{} \nError: {}", human_message, actual_error),
+                    Some(actual_error) => format!("{} \nActual Error: {}", human_message.replace("\n\n", "\n"), actual_error),
                     None => human_message.clone(),
                 };
 
@@ -96,25 +91,31 @@ impl<E: EguiCError> Notifier<E> {
 }
 
 #[derive(Clone)]
-pub enum StringOrError<E: EguiCError> {
-    Error(E),
+pub enum StringOrError {
+    Error(Arc<dyn CError>),
     String(String),
 }
 
-impl<E: EguiCError> From<E> for StringOrError<E> {
-    fn from(error: E) -> Self {
-        Self::Error(error)
-    }
-}
-
-impl<E: EguiCError> From<String> for StringOrError<E> {
+impl From<String> for StringOrError {
     fn from(string: String) -> Self {
         Self::String(string)
     }
 }
 
-impl<E: EguiCError> From<&str> for StringOrError<E> {
+impl From<&str> for StringOrError {
     fn from(string: &str) -> Self {
         Self::String(string.to_owned())
+    }
+}
+
+impl<E: CError + 'static> From<Box<E>> for StringOrError {
+    fn from(error: Box<E>) -> Self {
+        Self::Error(Arc::new(*error))
+    }
+}
+
+impl From<Box<dyn CError>> for StringOrError {
+    fn from(error: Box<dyn CError>) -> Self {
+        Self::Error(error.into())
     }
 }
