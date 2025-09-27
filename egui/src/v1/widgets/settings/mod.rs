@@ -67,7 +67,20 @@ impl<'a> Settings<'a> {
         notifier: &mut Notifier,
         show_state: &mut bool
     ) {
-        let mut save_and_toast = || {
+        let mut save_and_toast = |force_save: bool| {
+            if force_save {
+                match config_manager.save() {
+                    Ok(_) => {
+                        notifier.toast("Force saved config!", ToastLevel::Success, |_| {});
+                    },
+                    Err(error) => {
+                        notifier.toast(error, ToastLevel::Error, |_| {});
+                    }
+                }
+
+                return;
+            }
+
             match config_manager.save_if_changed() {
                 Ok(changed) => {
                     if changed {
@@ -80,10 +93,14 @@ impl<'a> Settings<'a> {
             }
         };
 
+        if ctx.input(|i| i.modifiers.ctrl && i.key_pressed(Key::S)) && *show_state {
+            save_and_toast(true);
+        }
+
         if ctx.input(|input| input.key_pressed(Key::Escape)) && *show_state {
             *show_state = false;
 
-            save_and_toast();
+            save_and_toast(false);
         }
 
         // TODO: make this key bind customizable via the 
@@ -92,7 +109,7 @@ impl<'a> Settings<'a> {
             *show_state = !*show_state;
 
             if *show_state == false {
-                save_and_toast();
+                save_and_toast(false);
             }
         }
     }
