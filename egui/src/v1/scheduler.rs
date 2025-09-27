@@ -49,6 +49,16 @@ impl<T> Scheduler<T> {
         }
     }
 
+    /// Returns a copy of the scheduler but reset.
+    // pub fn reset(self) -> Self {
+    //     Self {
+    //         delay: self.delay,
+    //         callback: self.callback,
+    //         time_scheduled: Instant::now(),
+    //         done: false
+    //     }
+    // }
+
     pub fn update(&mut self) -> Option<T> {
         if self.done == true {
             return None;
