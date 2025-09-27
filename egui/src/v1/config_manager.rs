@@ -61,7 +61,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
 
     pub fn update(&mut self, ctx: &Context, notifier: &mut Notifier) {
         if self.config_autosave_schedule.is_none() {
-            self.config_autosave_schedule = Some(Scheduler::new(|| {}, Duration::from_secs(4)));
+            self.config_autosave_schedule = Some(Scheduler::new(|| {}, Duration::from_secs(10)));
         }
 
         if let Some(ref mut config_autosave_schedule) = &mut self.config_autosave_schedule {
