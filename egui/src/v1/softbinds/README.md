@@ -1,16 +1,14 @@
 
 <div align="center">
 
-  # sillybinds
-
-  <sub>*Why is it called **silly**-binds? Because I was about to parse old and obscure linux key-binds... then I looked back and said that would be silly as fuck...* **also it can still parse silly stuff like this** `cTrL+sHiFt+a`</sub>
+  # Softbinds
 
 </div>
 
 > [!WARNING]
-> Don't take this readme seriously, this crate is still in development.
+> Still WIP. Not to be considered thought out.
 
-**sillybinds** is a **simple** cirrus crate our **Egui** applications use to parse **Wayland-style key-binding strings** user's have specified in their configs into the proper `egui::Key` stuff, with focus on **modern, simple and very common key-bind formats** — ignoring Vim formats and legacy linux X11 binds.
+**Softbinds** is a cirrus crate our **Egui** applications use to parse **Wayland-style key-binding strings** user's have specified in their configs into the proper `egui::Key` enums, with focus on **modern and familiar key-binding formats**.
 
 ```toml
 # Random toml config for a cloudy-org application...
