@@ -1,4 +1,4 @@
-use egui::{Color32, CursorIcon, Response, Sense, Stroke, Ui, Vec2};
+use egui::{CursorIcon, Response, Sense, Stroke, Ui, Vec2};
 
 /// Toggle button from Egui demo's app and modified a little to my liking:
 /// https://github.com/emilk/egui/blob/main/crates/egui_demo_lib/src/demo/toggle_switch.rs
@@ -51,14 +51,12 @@ impl<'a> ToggleButton<'a> {
                 radius,
                 visuals.bg_fill.gamma_multiply(0.9),
                 visuals.bg_stroke,
-                egui::StrokeKind::Inside,
             );
 
             let circle_x = egui::lerp((rect.left() + radius)..=(rect.right() - radius), how_true);
             let center = egui::pos2(circle_x, rect.center().y);
 
-            let circle_bg_fill = Color32::WHITE
-                .blend(visuals.bg_fill.gamma_multiply(0.4));
+            let circle_bg_fill = visuals.bg_fill.gamma_multiply(1.5);
 
             ui.painter()
                 .circle(

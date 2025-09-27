@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use cirrus_config::v1::config::CConfig;
 use cirrus_theming::v1::Theme;
-use egui::{Color32, Context, CornerRadius, Frame, Id, Key, Margin, RichText, Stroke, Ui};
+use egui::{Color32, Context, Rounding, Frame, Id, Key, Margin, RichText, Stroke, Ui};
 use egui_notify::ToastLevel;
 use log::debug;
 use toml_edit::{Document, Item, Table, Value};
@@ -176,8 +176,8 @@ impl<'a> Settings<'a> {
             let grid_frame_colour = Color32::from_hex(&theme.secondary_colour.hex_code).unwrap();
 
             let grid = Frame::group(&ui.style())
-                .corner_radius(CornerRadius {nw: 15, ne: 15, sw: 10, se: 10})
-                .outer_margin(Margin::same(7))
+                .rounding(Rounding {nw: 15.0, ne: 15.0, sw: 10.0, se: 10.0})
+                .outer_margin(Margin::same(7.0))
                 .stroke(Stroke::NONE)
                 .fill(grid_frame_colour);
 
@@ -241,8 +241,8 @@ impl<'a> Settings<'a> {
                             };
 
                             Frame::group(ui.style())
-                                .outer_margin(Margin { top: 7, ..Default::default() })
-                                .inner_margin(Margin { left: 12, right: 12, top: 4, bottom: 8 })
+                                .outer_margin(Margin { top: 7.0, ..Default::default() })
+                                .inner_margin(Margin { left: 12.0, right: 12.0, top: 4.0, bottom: 8.0 })
                                 .fill(grid_frame_colour.gamma_multiply(1.5))
                                 .show(ui, |ui|{
                                     Self::render_section(ui, section, &config_title, config_docstring);
