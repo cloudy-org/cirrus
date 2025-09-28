@@ -1,4 +1,4 @@
-use cirrus_theming::v1::Colour;
+use cirrus_theming::v1::colour::Colour;
 use egui::{Color32, CornerRadius, Style};
 
 pub fn set_widgets_style<'a>(
@@ -9,21 +9,21 @@ pub fn set_widgets_style<'a>(
     // give sliders a trailing colour.
     style.visuals.slider_trailing_fill = true;
 
-    let accent_colour = Color32::from_hex(&accent_colour.hex_code).unwrap();
+    let accent_colour = Color32::from_hex(&accent_colour.as_hex_string()).unwrap();
 
     // accent colour for widget's background fills should be darker
     style.visuals.selection.bg_fill = accent_colour.gamma_multiply(0.95);
 
     style.visuals.widgets.inactive.bg_fill = Color32::from_hex(
-        &secondary_colour.hex_code
+        &secondary_colour.as_hex_string()
     ).unwrap();
 
     style.visuals.widgets.active.bg_fill = Color32::from_hex(
-        &secondary_colour.hex_code
+        &secondary_colour.as_hex_string()
     ).unwrap();
 
     style.visuals.widgets.hovered.bg_fill = Color32::from_hex(
-        &secondary_colour.hex_code
+        &secondary_colour.as_hex_string()
     ).unwrap();
 
     // Improvements to widget frames and strokes.

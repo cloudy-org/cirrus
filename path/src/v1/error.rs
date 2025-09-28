@@ -3,8 +3,9 @@ use cirrus_error::v1::error::CError;
 
 static PLATFORM: &str = env::consts::OS;
 
-pub type Result<T, E = Error> = std::result::Result<T, E>; 
+pub type Result<T, E = Error> = std::result::Result<T, E>;
 
+#[derive(Debug)]
 pub enum Error {
     DirNotFoundForPlatform
 }

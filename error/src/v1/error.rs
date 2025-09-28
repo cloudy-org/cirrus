@@ -1,6 +1,8 @@
+use std::fmt::Debug;
+
 /// Error trait from the cirrus tool kit 
 /// to ease passing errors around the tool kit.
-pub trait CError {
+pub trait CError: Debug {
     /// This should return a human readable message about the error that just occurred.
     /// It MUST also be easily interpretable by a non technical user as this is what 
     /// will be displayed to the user on the GUI.

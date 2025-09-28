@@ -1,5 +1,4 @@
-use cirrus_theming::v1::Theme;
-
+use cirrus_theming::v1::theme::Theme;
 use egui::{Context, Style, TextStyle};
 
 pub mod fonts;
@@ -56,13 +55,13 @@ impl Styling<'_> {
             None => TextStyle::Monospace,
         };
 
-        fonts::set_font_style(&mut self.egui_style, text_style, &self.theme.text_colour);
+        fonts::set_font_style(&mut self.egui_style, text_style, &self.theme.pallet.text);
 
         self
     }
 
     pub fn set_background(&mut self) -> &mut Self {
-        background::set_background_style(&mut self.egui_style, &self.theme.primary_colour);
+        background::set_background_style(&mut self.egui_style, &self.theme.pallet.primary);
 
         self
     }
@@ -77,8 +76,8 @@ impl Styling<'_> {
     pub fn set_widgets(&mut self) -> &mut Self {
         widgets::set_widgets_style(
             &mut self.egui_style,
-            &self.theme.secondary_colour,
-            &self.theme.accent_colour
+            &self.theme.pallet.secondary,
+            &self.theme.pallet.accent
         );
 
         self
@@ -87,9 +86,9 @@ impl Styling<'_> {
     pub fn set_windows(&mut self) -> &mut Self {
         windows::set_windows_style(
             &mut self.egui_style,
-            &self.theme.primary_colour,
-            &self.theme.secondary_colour,
-            &self.theme.third_colour
+            &self.theme.pallet.primary,
+            &self.theme.pallet.secondary,
+            &self.theme.pallet.surface
         );
 
         self

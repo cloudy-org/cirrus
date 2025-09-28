@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use cirrus_config::v1::config::CConfig;
-use cirrus_theming::v1::Theme;
+use cirrus_theming::v1::theme::Theme;
 use egui::{Color32, Context, CornerRadius, Frame, Id, Key, Margin, RichText, Stroke, Ui};
 use egui_notify::ToastLevel;
 use log::debug;
@@ -173,7 +173,7 @@ impl<'a> Settings<'a> {
         ui.vertical_centered(|ui| {
             ui.set_max_width(ui.available_width().min(900.0));
 
-            let grid_frame_colour = Color32::from_hex(&theme.secondary_colour.hex_code).unwrap();
+            let grid_frame_colour = Color32::from_hex(&theme.pallet.secondary.as_hex_string()).unwrap();
 
             let grid = Frame::group(&ui.style())
                 .corner_radius(CornerRadius {nw: 15, ne: 15, sw: 10, se: 10})
