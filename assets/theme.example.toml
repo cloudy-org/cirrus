@@ -1,5 +1,6 @@
 # This is an example of the "theme.toml" file.
-dark_mode = false
+version = 1
+dark_mode = false # theme is a light mode theme
 
 # A cheerful and colourful colour pallet.
 [pallet]
