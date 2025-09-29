@@ -13,6 +13,13 @@ impl Theme {
     pub fn new(
         fallback_accent_colour: Option<Colour>
     ) -> Self {
+        // let mut default_pallet = ColourPallet {
+        //     primary: 0xF5FFFA.into(),
+        //     surface: 0xF4C2C2.into(),
+        //     text: 0x423939.into(),
+        //     accent: 0xFBAED2.into(),
+        // };
+
         let mut default_pallet = ColourPallet::default_dark();
 
         if let Some(accent_colour) = fallback_accent_colour {

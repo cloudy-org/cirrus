@@ -1,0 +1,9 @@
+# This is an example of the "theme.toml" file.
+dark_mode = false
+
+# A cheerful and colourful colour pallet.
+[pallet]
+primary = "#F5FFFA" # Mint Cream
+surface = "#F4C2C2" # Mimi Pink
+text = "#423939"
+accent = "#FBAED2" # Lavender Pink

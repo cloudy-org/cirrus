@@ -61,7 +61,10 @@ impl Styling<'_> {
     }
 
     pub fn set_background(&mut self) -> &mut Self {
-        background::set_background_style(&mut self.egui_style, &self.theme.pallet.primary);
+        background::set_background_style(
+            &mut self.egui_style,
+            &self.theme.pallet.primary
+        );
 
         self
     }
@@ -76,7 +79,9 @@ impl Styling<'_> {
     pub fn set_widgets(&mut self) -> &mut Self {
         widgets::set_widgets_style(
             &mut self.egui_style,
-            &self.theme.pallet.secondary,
+            &self.theme.pallet.primary,
+            &self.theme.pallet.surface,
+            &self.theme.pallet.text,
             &self.theme.pallet.accent
         );
 
@@ -87,7 +92,6 @@ impl Styling<'_> {
         windows::set_windows_style(
             &mut self.egui_style,
             &self.theme.pallet.primary,
-            &self.theme.pallet.secondary,
             &self.theme.pallet.surface
         );
 

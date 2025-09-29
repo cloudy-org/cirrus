@@ -6,15 +6,17 @@ static DEFAULT_ACCENT_HEX: u32 = 0x7afff8;
 pub struct ColourPallet {
     /// Primary colour should be used for background colour (e.g: app window canvas).
     pub primary: Colour,
-    /// This is a secondary background colour that can be used on widgets or sections 
-    /// that require extra emphasis than primary. Like a sidebar or floating window.
-    pub secondary: Colour,
-    /// Subtle neutral layer colour that sits above the primary or secondary colour. Should be 
-    /// used for elevated layers like containers inside a section, like cards, toolbars or backgrounds inside a panel.
+    /// Surface should be lighter than primary by a subtle difference.
+    /// 
+    /// Surface is a supporting colour that blends with primary to create a secondary colour that is then 
+    /// used on elevated layers to give subtle emphasis; like containers inside a section, cards, toolbars or 
+    /// backgrounds inside a panel.
     pub surface: Colour,
-
     /// Foreground text colour.
     pub text: Colour,
+    /// Accent is the strongest emphasis colour. It's used in interactive 
+    /// elements like buttons, sliders, highlights and it's also sometimes used
+    /// as the stroke colour when drawing certain patterns and in loading animations.
     pub accent: Colour,
 }
 
@@ -22,8 +24,7 @@ impl ColourPallet {
     pub fn default_dark() -> Self {
         Self {
             primary: Colour::from_hex(0x0d0d0d),
-            secondary: Colour::from_hex(0x201f1f),
-            surface: Colour::from_hex(0x494848),
+            surface: Colour::from_hex(0x3C3939),
             text: Colour::from_hex(0xb5b5b5),
             accent: Colour::from_hex(DEFAULT_ACCENT_HEX)
         }
@@ -32,9 +33,8 @@ impl ColourPallet {
     pub fn default_light() -> Self {
         Self {
             primary: Colour::from_hex(0xdff5f5),
-            secondary: Colour::from_hex(0xd9f0ff),
-            surface: Colour::from_hex(0x57575b),
-            text: Colour::from_hex(0x3b3b3b),
+            surface: Colour::from_hex(0xB8E2FF),
+            text: Colour::from_hex(0x242424),
             accent: Colour::from_hex(DEFAULT_ACCENT_HEX)
         }
     }

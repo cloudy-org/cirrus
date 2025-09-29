@@ -173,13 +173,23 @@ impl<'a> Settings<'a> {
         ui.vertical_centered(|ui| {
             ui.set_max_width(ui.available_width().min(900.0));
 
-            let grid_frame_colour = Color32::from_hex(&theme.pallet.secondary.as_hex_string()).unwrap();
+            let primary_colour = Color32::from_hex(&theme.pallet.primary.as_hex_string()).unwrap();
+            let surface_colour = Color32::from_hex(&theme.pallet.surface.as_hex_string()).unwrap();
+            let text_colour = Color32::from_hex(&theme.pallet.text.as_hex_string()).unwrap();
+
+            let settings_grid_colour = primary_colour.blend(
+                surface_colour.gamma_multiply(0.2)
+            );
+
+            let settings_section_colour = settings_grid_colour.blend(Color32::GRAY.gamma_multiply(0.1));
+
+            let settings_section_stroke = Stroke::new(1.0, text_colour.gamma_multiply(0.3));
 
             let grid = Frame::group(&ui.style())
                 .corner_radius(CornerRadius {nw: 15, ne: 15, sw: 10, se: 10})
                 .outer_margin(Margin::same(7))
                 .stroke(Stroke::NONE)
-                .fill(grid_frame_colour);
+                .fill(settings_grid_colour);
 
             egui::ScrollArea::vertical().show(ui, |ui| {
                 grid.show(ui, |ui| {
@@ -241,9 +251,10 @@ impl<'a> Settings<'a> {
                             };
 
                             Frame::group(ui.style())
+                                .stroke(settings_section_stroke)
                                 .outer_margin(Margin { top: 7, ..Default::default() })
                                 .inner_margin(Margin { left: 12, right: 12, top: 4, bottom: 8 })
-                                .fill(grid_frame_colour.gamma_multiply(1.5))
+                                .fill(settings_section_colour)
                                 .show(ui, |ui|{
                                     Self::render_section(ui, section, &config_title, config_docstring);
                                 });
