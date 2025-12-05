@@ -60,7 +60,7 @@ impl<'a> Settings<'a> {
         self
     }
 
-    /// Handles settings panel open and closing input as well as saving config on exit.
+    /// Handles settings panel open and closing input as well as saving config on exit all for us.
     pub fn handle_input<T: CConfig>(
         ctx: &Context,
         config_manager: &mut ConfigManager<T>,
@@ -344,7 +344,7 @@ impl<'a> Settings<'a> {
             let line = lines[index as usize].trim_start();
 
             if line.starts_with('#') {
-                let formatted_line = line.trim_start_matches('#').trim_start();
+                let formatted_line = line.trim_start_matches('#').trim_start().trim_end();
                 docstring_lines.push(formatted_line);
                 index -= 1;
             } else {
@@ -354,6 +354,6 @@ impl<'a> Settings<'a> {
         }
 
         docstring_lines.reverse();
-        docstring_lines.join("\n")
+        docstring_lines.join(" ")
     }
 }

@@ -1,5 +1,11 @@
 use std::time::{Duration, Instant};
 
+struct InnerScheduler<T> {
+    delay: Duration,
+    callback: Box<dyn FnMut() -> T>,
+    time_scheduled: Instant,
+}
+
 /// A neat way to handle scheduling events for later in a egui update loop.
 /// 
 /// ```rust
@@ -33,44 +39,46 @@ use std::time::{Duration, Instant};
 /// }
 /// ```
 pub struct Scheduler<T = ()> {
-    delay: Duration,
-    callback: Box<dyn FnMut() -> T>,
-    time_scheduled: Instant,
+    inner: Option<InnerScheduler<T>>,
     pub done: bool
 }
 
 impl<T> Scheduler<T> {
+    pub const UNSET: Self = Self { inner: None, done: true };
+
     pub fn new(callback: impl FnMut() -> T + 'static, delay: Duration) -> Self {
         Self {
-            delay,
-            callback: Box::new(callback),
-            time_scheduled: Instant::now(),
+            inner: Some(
+                InnerScheduler {
+                    delay,
+                    callback: Box::new(callback),
+                    time_scheduled: Instant::now(),
+                }
+            ),
             done: false
         }
     }
-
-    /// Returns a copy of the scheduler but reset.
-    // pub fn reset(self) -> Self {
-    //     Self {
-    //         delay: self.delay,
-    //         callback: self.callback,
-    //         time_scheduled: Instant::now(),
-    //         done: false
-    //     }
-    // }
 
     pub fn update(&mut self) -> Option<T> {
         if self.done == true {
             return None;
         }
 
-        if self.time_scheduled.elapsed() >= self.delay {
-            let return_value = (self.callback)();
-            self.done = true;
+        if let Some(inner) = self.inner.as_mut() {
+            if inner.time_scheduled.elapsed() >= inner.delay {
+                let return_value = (inner.callback)();
+                self.done = true;
 
-            return Some(return_value);
+                return Some(return_value);
+            }
         }
 
         None
+    }
+}
+
+impl Default for Scheduler {
+    fn default() -> Self {
+        Self::UNSET
     }
 }
