@@ -4,6 +4,8 @@ static DEFAULT_ACCENT_HEX: u32 = 0x7afff8;
 
 #[derive(Clone)]
 pub struct ColourPallet {
+    /// Is this colour pallet meant for dark mode?
+    pub is_dark: bool,
     /// Primary colour should be used for background colour (e.g: app window canvas).
     pub primary: Colour,
     /// Surface should be lighter than primary by a subtle difference.
@@ -23,6 +25,7 @@ pub struct ColourPallet {
 impl ColourPallet {
     pub fn default_dark() -> Self {
         Self {
+            is_dark: true,
             primary: Colour::from_hex(0x0d0d0d),
             surface: Colour::from_hex(0x3C3939),
             text: Colour::from_hex(0xb5b5b5),
@@ -32,6 +35,7 @@ impl ColourPallet {
 
     pub fn default_light() -> Self {
         Self {
+            is_dark: false,
             primary: Colour::from_hex(0xdff5f5),
             surface: Colour::from_hex(0xB8E2FF),
             text: Colour::from_hex(0x242424),

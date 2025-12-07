@@ -2,7 +2,7 @@ use std::{fs, hash::{DefaultHasher, Hasher}, path::PathBuf, time::Duration};
 
 use cirrus_config::v1::{config::{get_and_create_config_file, CConfig}, error::Error as ConfigError};
 use cirrus_error::v1::error::CError;
-use cirrus_path::v1::get_user_config_dir_path;
+use cirrus_path::v1::get_user_config_cloudy_folder_path;
 use egui::Context;
 use egui_notify::ToastLevel;
 use log::debug;
@@ -41,7 +41,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
 
         let config_hash = hasher.finish();
 
-        let config_path = get_user_config_dir_path(app_name)?.join("config.toml");
+        let config_path = get_user_config_cloudy_folder_path()?.join(app_name).join("config.toml");
         // Reading the config here really shouldn't fail as that would be caught by 
         // "get_and_create_config_file" but I guess just to be extra safe and panic-less 
         // let's map it to the same exact error.

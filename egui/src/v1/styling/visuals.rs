@@ -4,7 +4,7 @@ use crate::v1::styling::Styling;
 
 impl Styling<'_> {
     pub fn set_visuals(&mut self) -> &mut Self {
-        let is_dark = self.theme.is_dark;
+        let is_dark = self.theme.pallet.is_dark;
         let colour_pallet = &self.theme.pallet;
 
         let primary_colour = Color32::from_hex(&colour_pallet.primary.as_hex_string()).unwrap();
