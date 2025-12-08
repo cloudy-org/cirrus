@@ -19,7 +19,7 @@ impl Colour {
         Ok(Self::from_hex(hex_code))
     }
 
-    pub fn as_hex_string(&self) -> String {
+    pub fn to_hex_string(&self) -> String {
         format!("#{:06x}", self.hex)
     }
 }

@@ -7,11 +7,11 @@ impl Styling<'_> {
         let is_dark = self.theme.pallet.is_dark;
         let colour_pallet = &self.theme.pallet;
 
-        let primary_colour = Color32::from_hex(&colour_pallet.primary.as_hex_string()).unwrap();
-        let interactive_colour = Color32::from_hex(&colour_pallet.interactive.as_hex_string()).unwrap();
-        let surface_colour = Color32::from_hex(&colour_pallet.surface.as_hex_string()).unwrap();
-        let text_colour = Color32::from_hex(&colour_pallet.text.as_hex_string()).unwrap();
-        let accent_colour = Color32::from_hex(&colour_pallet.accent.as_hex_string()).unwrap();
+        let primary_colour = Color32::from_hex(&colour_pallet.primary.to_hex_string()).unwrap();
+        let interactive_colour = Color32::from_hex(&colour_pallet.interactive.to_hex_string()).unwrap();
+        let surface_colour = Color32::from_hex(&colour_pallet.surface.to_hex_string()).unwrap();
+        let text_colour = Color32::from_hex(&colour_pallet.text.to_hex_string()).unwrap();
+        let accent_colour = Color32::from_hex(&colour_pallet.accent.to_hex_string()).unwrap();
 
         // Derive stroke colour from subtle text colour and put surface colour behind it.
         let stroke_colour = surface_colour.blend(
