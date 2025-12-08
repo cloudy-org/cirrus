@@ -28,7 +28,7 @@ impl ColourPallet {
     pub fn default_dark() -> Self {
         Self {
             is_dark: true,
-            primary: Colour::from_hex(0x0d0d0d),
+            primary: Colour::from_hex(0x0A0A0A),
             interactive: Colour::from_hex(0x2E2E2E),
             surface: Colour::from_hex(0x3C3939),
             text: Colour::from_hex(0xb5b5b5),
