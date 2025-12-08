@@ -1,0 +1,10 @@
+# 🦆 All programmers should have a rubber ducky.
+version = 1
+dark_mode = false
+
+[pallet]
+primary = "#FFFDF5"
+interactive = "#FFE8A3"
+surface = "#FFD7BA"
+text = "#433A2C"
+accent = "#ff8800"
