@@ -1,0 +1,47 @@
+use crate::v1::error::Error;
+
+#[derive(Clone, Copy)]
+pub struct Colour {
+    pub hex: u32
+}
+
+impl Colour {
+    pub fn from_hex(hex: u32) -> Self {
+        Self { hex }
+    }
+
+    pub fn from_hex_string(hex_string: &str) -> Result<Self, Error> {
+        let formatted_hex_code = hex_string.replace("#", "");
+
+        let hex_code: u32 = u32::from_str_radix(&formatted_hex_code, 16)
+            .map_err(|error| Error::FailedToParseHexCode(error.to_string(), hex_string.to_string()))?;
+
+        Ok(Self::from_hex(hex_code))
+    }
+
+    pub fn to_hex_string(&self) -> String {
+        format!("#{:06x}", self.hex)
+    }
+}
+
+impl From<u32> for Colour {
+    fn from(value: u32) -> Self {
+        Self::from_hex(value)
+    }
+}
+
+impl TryFrom<&str> for Colour {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Self::from_hex_string(value)
+    }
+}
+
+impl TryFrom<String> for Colour {
+    type Error = Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::from_hex_string(&value)
+    }
+}

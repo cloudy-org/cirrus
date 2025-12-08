@@ -1,11 +1,16 @@
-use cirrus_theming::v1::Colour;
+use egui::{TextStyle};
 
-use egui::{Color32, Style, TextStyle};
+use crate::v1::styling::Styling;
 
-pub fn set_font_style<'a>(style: &'a mut Style, text_style: TextStyle, text_colour: &'a Colour) {
-    style.override_text_style = Some(text_style);
+impl Styling<'_> {
+    pub fn set_fonts(&mut self, text_style: Option<TextStyle>) -> &mut Self {
+        let text_style = match text_style {
+            Some(text_style) => text_style,
+            None => TextStyle::Monospace,
+        };
 
-    style.visuals.override_text_color = Some(
-        Color32::from_hex(&text_colour.hex_code).unwrap()
-    );
+        self.egui_style.override_text_style = Some(text_style);
+
+        self
+    }
 }

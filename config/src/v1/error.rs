@@ -1,5 +1,6 @@
 use cirrus_error::v1::error::CError;
 
+#[derive(Debug)]
 pub enum Error {
     FailedToCreateConfigFile(String),
     FailedToCreateConfigDirectory(String),

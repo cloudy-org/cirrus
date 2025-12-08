@@ -1,7 +1,7 @@
 use std::{fs, hash::Hash};
 
 use log::debug;
-use cirrus_path::v1::{get_user_config_dir_path};
+use cirrus_path::v1::{get_user_config_cloudy_folder_path};
 use cirrus_error::v1::error::CError;
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -10,7 +10,7 @@ use crate::v1::error::Error;
 pub trait CConfig: DeserializeOwned + Serialize + Hash + Default {}
 
 pub fn get_and_create_config_file<T: CConfig>(app_name: &str, template_config_toml_string: &str) -> Result<T, Box<dyn CError>> {
-    let roseate_config_dir_path = get_user_config_dir_path(&app_name)?;
+    let roseate_config_dir_path = get_user_config_cloudy_folder_path()?.join(&app_name);
 
     if !roseate_config_dir_path.exists() {
         debug!("Config directory missing ({}), creating dir for '{}'...", roseate_config_dir_path.display(), app_name);
