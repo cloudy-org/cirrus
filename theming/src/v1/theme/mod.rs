@@ -32,7 +32,7 @@ impl Theme {
             fallback_config_theme.pallet.accent = accent_colour;
         }
 
-        let config_theme = match Self::get_theme_from_config(fallback_config_theme.pallet.clone()) {
+        let config_theme = match Self::get_theme_from_config() {
             Ok(Some(theme)) => theme,
             Ok(None) => {
                 log::warn!("No theme.toml file found, cirrus may use a default theme!");
@@ -77,7 +77,7 @@ impl Theme {
         }
     }
 
-    fn get_theme_from_config(fallback_colour_pallet: ColourPallet) -> Result<Option<Self>, Error> {
+    fn get_theme_from_config() -> Result<Option<Self>, Error> {
         let theme_path = get_user_config_cloudy_folder_path()
             .map_err(
                 |error| Error::FailedToFindThemeToml(
@@ -100,7 +100,7 @@ impl Theme {
                     ))?;
 
                 match theme_version.as_integer() {
-                    Some(1) => Ok(Some(config::v1::parse(&toml_string, fallback_colour_pallet)?)),
+                    Some(1) => Ok(Some(config::v1::parse(&toml_string)?)),
                     _ => Err(
                         Error::FailedToReadThemeToml(
                             String::from(

@@ -16,7 +16,7 @@ pub fn ui_strong_selectable_value<Value: PartialEq>(
         let visuals_mut = ui.visuals_mut();
 
         // accent colour is too bright most of the time making the text unreadable
-        visuals_mut.selection.bg_fill = visuals_mut.selection.bg_fill.gamma_multiply(0.75);
+        visuals_mut.selection.bg_fill = visuals_mut.selection.bg_fill.gamma_multiply(0.8);
 
         let mut rich_text: RichText = text.into();
 
