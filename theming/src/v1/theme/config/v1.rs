@@ -24,14 +24,14 @@ struct ThemePalletV1 {
     pub accent: Option<String>,
 }
 
-pub fn parse(toml_string: &str) -> Result<Theme, Error> {
+pub fn parse(toml_string: &str, fallback_accent_colour: Colour) -> Result<Theme, Error> {
     let theme_config: ThemeConfigV1 = toml::from_str(&toml_string)
         .map_err(|error| Error::FailedToReadThemeToml(error.to_string()))?;
 
+    let is_dark = theme_config.dark_mode;
     let theme_pallet = theme_config.pallet;
 
     let transparent_colour = Colour::from_hex(TRANSPARENT_HEX);
-    let default_accent_colour = Colour::from_hex(DEFAULT_ACCENT_HEX);
 
     let primary_colour: Colour = match theme_pallet.primary {
         Some(hex_string) => Colour::try_from(hex_string)?,
@@ -50,12 +50,15 @@ pub fn parse(toml_string: &str) -> Result<Theme, Error> {
 
     let text_colour = match theme_pallet.text {
         Some(hex_string) => Colour::try_from(hex_string)?,
-        None => transparent_colour,
+        None => match is_dark {
+            true => Colour::from_hex(0xffffff),
+            false => Colour::from_hex(0x000000)
+        },
     };
 
     let accent_colour = match theme_pallet.accent {
         Some(hex_string) => Colour::try_from(hex_string)?,
-        None => default_accent_colour,
+        None => fallback_accent_colour,
     };
 
     Ok(

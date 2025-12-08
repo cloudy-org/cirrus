@@ -6,7 +6,7 @@ use std::{env, fs};
 use cirrus_error::v1::error::CError;
 use cirrus_path::v1::get_user_config_cloudy_folder_path;
 
-use crate::v1::{colour::Colour, error::Error, pallet::ColourPallet};
+use crate::v1::{colour::Colour, error::Error, pallet::{ColourPallet, DEFAULT_ACCENT_HEX}};
 
 #[derive(Clone)]
 pub struct Theme {
@@ -26,13 +26,18 @@ impl Theme {
         //     accent: 0xFBAED2.into(),
         // };
 
-        let mut fallback_config_theme = Theme { pallet: ColourPallet::default_dark() };
+        let fallback_accent_colour = fallback_accent_colour.unwrap_or(
+            Colour::from_hex(DEFAULT_ACCENT_HEX)
+        );
 
-        if let Some(accent_colour) = fallback_accent_colour {
-            fallback_config_theme.pallet.accent = accent_colour;
-        }
+        let fallback_config_theme = Theme {
+            pallet: ColourPallet {
+                accent: fallback_accent_colour,
+                ..ColourPallet::default_dark()
+            }
+        };
 
-        let config_theme = match Self::get_theme_from_config() {
+        let config_theme = match Self::get_theme_from_config(fallback_accent_colour) {
             Ok(Some(theme)) => theme,
             Ok(None) => {
                 log::warn!("No theme.toml file found, cirrus may use a default theme!");
@@ -77,7 +82,7 @@ impl Theme {
         }
     }
 
-    fn get_theme_from_config() -> Result<Option<Self>, Error> {
+    fn get_theme_from_config(fallback_accent_colour: Colour) -> Result<Option<Self>, Error> {
         let theme_path = get_user_config_cloudy_folder_path()
             .map_err(
                 |error| Error::FailedToFindThemeToml(
@@ -100,7 +105,7 @@ impl Theme {
                     ))?;
 
                 match theme_version.as_integer() {
-                    Some(1) => Ok(Some(config::v1::parse(&toml_string)?)),
+                    Some(1) => Ok(Some(config::v1::parse(&toml_string, fallback_accent_colour)?)),
                     _ => Err(
                         Error::FailedToReadThemeToml(
                             String::from(
