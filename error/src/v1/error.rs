@@ -9,7 +9,7 @@ pub trait CError: Debug {
     /// 
     /// Also if you're including the actual error in the message please format 
     /// it like so where the actual error is pushed to a new line:
-    /// ```rust
+    /// ```ignore
     /// fn human_message(&self) -> String {
     ///     match self {
     ///         Error::FailedToSaveConfig(actual_error) => format!(

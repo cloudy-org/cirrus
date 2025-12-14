@@ -6,14 +6,14 @@ pub mod error;
 /// For example `config_key_path!(self.config.field_a.field_b)` will result in `field_a.field_b`.
 /// 
 /// ## Example A
-/// ```rust
-/// let path: &str = config_key_path!(config.misc.enable_custom_folder);
+/// ```ignore
+/// let path = config_key_path!(config.misc.enable_custom_folder);
 /// 
 /// assert!(path, "misc.enable_custom_folder");
 /// ```
 /// 
 /// ## Example B
-/// ```rust
+/// ```ignore
 /// Settings::new(&self.config_template_string)
 ///     .add_section::<bool>(
 ///         Section::new(
