@@ -73,9 +73,14 @@ impl Notifier {
         }
     }
 
-    pub fn set_loading(&self, message: Option<String>) {
+    pub fn set_loading(&self, message: Option<impl ToString>) {
+        let message = match message {
+            Some(message) => Some(message.to_string()),
+            None => None,
+        };
+
         if let Some(msg) = &message {
-            log::info!("{}", msg);
+            log::info!("{}", msg.to_string());
         }
 
         if let Ok(mut loading) = self.loading_lock.write() {
