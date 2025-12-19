@@ -4,7 +4,7 @@ use crate::v1::{colour::Colour, error::Error, pallet::{ColourPallet, DEFAULT_ACC
 
 #[derive(Deserialize)]
 pub struct ThemeConfigV1 {
-    #[warn(dead_code)]
+    #[allow(dead_code)]
     version: i8,
     dark_mode: bool,
     pallet: ThemePalletV1
