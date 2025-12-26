@@ -19,14 +19,7 @@ impl SoftbindsExt for Key {
     fn softbinds<S: Into<String>>(keybind_str: S) -> Result<Vec<Key>, String> {
         let str = normalize(&keybind_str.into());
 
-        let keys: Result<Vec<Key>, String> = if str.contains(" ") {
-            str.split(" ")
-                .map(|f| match Key::from_name(&normalize(f.trim())) {
-                    Some(key) => Ok(key),
-                    None => Err(format!("{} is not a known key", f)),
-                })
-                .collect()
-        } else if str.contains("+") {
+        let keys: Result<Vec<Key>, String> = if str.contains("+") {
             str.split("+")
                 .map(|f| match Key::from_name(&normalize(f.trim())) {
                     Some(key) => Ok(key),
@@ -34,7 +27,10 @@ impl SoftbindsExt for Key {
                 })
                 .collect()
         } else {
-            return Err("Given string is not using a known formatting structure".to_string());
+            match Key::from_name(&str) {
+                Some(key) => Ok(vec![key]),
+                None => Err("Given string is not using a known formatting structure".to_string()),
+            }
         };
 
         Ok(keys?)
@@ -50,7 +46,10 @@ mod tests {
         let test1 = "Tab+T";
         assert_eq!(Key::softbinds(test1).unwrap(), vec![Key::Tab, Key::T]);
 
-        let test2 = "tAb t";
+        let test2 = "taB+t";
         assert_eq!(Key::softbinds(test2).unwrap(), vec![Key::Tab, Key::T]);
+
+        let test3 = "tAb";
+        assert_eq!(Key::softbinds(test3).unwrap(), vec![Key::Tab]);
     }
 }
