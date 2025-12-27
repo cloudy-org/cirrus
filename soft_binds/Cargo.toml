@@ -1,0 +1,10 @@
+[package]
+name = "cirrus_softbinds"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+egui = ["dep:egui"]
+
+[dependencies]
+egui = { version = "0.33", optional = true }
