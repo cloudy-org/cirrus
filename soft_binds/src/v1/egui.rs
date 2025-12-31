@@ -1,9 +1,12 @@
 use egui::Key;
+use log::debug;
 
 use crate::v1::{error::{Error, Result}, keys::Keys, tiny_lexer::Token};
 
 impl Keys {
     pub fn egui_keys(&self) -> Result<Vec<egui::Key>> {
+        debug!("Parsing the soft-binds keys '{:?}' into egui keys...", self);
+
         let mut keys = Vec::new();
 
         for token in &self.tokens {

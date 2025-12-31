@@ -1,5 +1,6 @@
 use crate::v1::{error::Result, tiny_lexer::{Token, tokenize}};
 
+#[derive(Debug)]
 pub struct Keys {
     pub(crate) tokens: Vec<Token>
 }

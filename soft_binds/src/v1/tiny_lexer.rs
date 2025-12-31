@@ -1,3 +1,5 @@
+use log::debug;
+
 use crate::v1::error::{Error, Result};
 
 // NOTE: For now, all chars will be generalized into 
@@ -18,6 +20,8 @@ pub enum Token {
 // NOTE: the tokenizer is more advanced than it should be to 
 // leave room in the future for more advanced levels of parsing.
 pub fn tokenize(key_binds: String) -> Result<Vec<Token>> {
+    debug!("Tokenising the key binds '{key_binds}'...");
+
     let mut tokens = Vec::new();
 
     let mut chars = key_binds.chars().peekable();
