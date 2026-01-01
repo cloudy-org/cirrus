@@ -14,7 +14,8 @@ pub struct ConfigManager<T: CConfig> {
     pub config: T,
     last_config_hash: u64,
 
-    config_path: Option<PathBuf>,
+    pub config_path: Option<PathBuf>,
+
     config_disk_string_copy: Option<String>,
 
     config_autosave_schedule: Option<Scheduler>,

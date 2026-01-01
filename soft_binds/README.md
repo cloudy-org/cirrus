@@ -1,14 +1,14 @@
 
 <div align="center">
 
-  # Softbinds
+  # soft-binds
 
 </div>
 
 > [!WARNING]
 > Still WIP. Not to be considered thought out.
 
-**Softbinds** is a cirrus crate our **Egui** applications use to parse **Wayland-style key-binding strings** user's have specified in their configs into the proper `egui::Key` enums, with focus on **modern and familiar key-binding formats**.
+**Soft-binds** is a cirrus crate our **Egui** applications use to parse user friendly key-binding strings user's have specified in their configs into the proper `egui::Key` enums.
 
 ```toml
 # Random toml config for a cloudy-org application...
