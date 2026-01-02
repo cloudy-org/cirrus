@@ -16,3 +16,6 @@ egui = "0.33"
 textwrap = "0.16"
 egui-notify = "0.21"
 serde = { version = "1.0", features = ["derive"] }
+
+sysinfo = "0.35.2"
+re_format = "0.23.1"
