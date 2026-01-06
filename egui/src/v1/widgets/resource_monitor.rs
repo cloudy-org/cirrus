@@ -1,120 +1,85 @@
-use std::{time::Instant, sync::Arc};
+use std::{alloc, sync::Arc};
 
-use egui::{InnerResponse, Label, Pos2, Response, RichText, Ui, WidgetText};
-use sysinfo::{Pid, System};
+use cap::Cap;
+use egui::{Context, Pos2, RichText, Ui, WidgetText, util::History};
 
 use crate::{v1::ui_utils::richtext::ui_non_select_label, rich_text_or_unknown};
 
-use crate::v1::error::Error;
+#[global_allocator]
+static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::max_value());
 
 pub struct ResourceMonitor {
-    system: System,
-    pid: Pid,
+    show_settings_ui: bool,
+    show_inspection_ui: bool,
+    show_texture_ui: bool,
+    show_memory_ui: bool,
 
-    cpu_name: RichText,
-    total_memory: String,
-    started: Option<String>,
-
-    last_cpu_usage: Option<String>,
-    last_pull: Instant
+    frame_times: History<f32>,
 }
 
 impl ResourceMonitor {
-    pub fn new() -> Result<Self, Error> {
-        let system = System::new_all();
-        let pid = sysinfo::get_current_pid().map_err(|e| Error::FailedToFindPid(e.into()))?;
+    pub fn new() -> Self {
+        let max_age: f32 = 1.0;
+        let max_len = (max_age * 300.0).round() as usize;
 
-        let cpu_name = match system.cpus().first() {
-            Some(cpu) => {
-                let brand = cpu.brand();
-                let name = cpu.name();
+        Self {
+            show_settings_ui: false,
+            show_inspection_ui: false,
+            show_texture_ui: false,
+            show_memory_ui: false,
 
-                let cleaned_name = Self::clean_cpu_name(format!("{} {}", brand, name));
-                RichText::new(cleaned_name)
-            }
-            None => RichText::new("Unknown").weak()
-        };
-
-        let total_memory = re_format::format_bytes(system.total_memory() as f64);
-
-        Ok(
-            Self {
-                system,
-                pid,
-
-                cpu_name,
-                total_memory,
-
-                started: None,
-
-                last_cpu_usage: None,
-                last_pull: Instant::now()
-            }
-        )
-    }
-
-    fn clean_cpu_name(raw: String) -> String {
-        let mut clean = raw.clone();
-
-        let gpu_phrases = [
-            "with Radeon Vega Mobile Gfx",
-            "with Radeon Vega",
-            "with Radeon Graphics",
-            "with Radeon",
-            "with Vega",
-            "Graphics",
-            "with Intel",
-            "with UHD Graphics",
-            "with HD Graphics",
-            "Gfx",
-            "Graphics Family",
-            "Gpu",
-            "APU",
-            "CPU @",
-            "GHz",
-            "MHz",
-
-            "cpu0",
-        ];
-
-        for phrase in &gpu_phrases {
-            clean = clean.replace(phrase, "");
+            frame_times: History::new(0..max_len, 1.0)
         }
-
-        clean = clean
-            .replace("(R)", "")
-            .replace("(TM)", "")
-            .replace("(tm)", "")
-            .replace("  ", " ");
-
-        clean.trim().to_string()
     }
 
     pub fn show(&mut self, ui: &mut Ui, extra_data: Vec<(String, RichText, Option<String>)>) {
+        let ctx = ui.ctx().clone();
+        if self.show_inspection_ui {
+            egui::Window::new("Inspection UI")
+                .min_width(250.0)
+                .max_width(400.0)
+                .min_height(350.0)
+                .max_height(500.0)
+                .show(&ctx, |ui| {
+                    ctx.inspection_ui(ui);
+                });
+        }
+        if self.show_memory_ui {
+            egui::Window::new("Memory UI")
+                .min_width(250.0)
+                .max_width(400.0)
+                .min_height(350.0)
+                .max_height(500.0)
+                .show(&ctx, |ui| {
+                    ctx.memory_ui(ui);
+                });
+        }
+        if self.show_settings_ui {
+            egui::Window::new("Settings UI (egui)")
+                .min_width(250.0)
+                .max_width(400.0)
+                .min_height(350.0)
+                .max_height(500.0)
+                .show(&ctx, |ui| {
+                    ctx.settings_ui(ui);
+                });
+        }
+        if self.show_texture_ui {
+            egui::Window::new("Texture UI")
+                .min_width(250.0)
+                .max_width(400.0)
+                .min_height(350.0)
+                .max_height(500.0)
+                .show(&ctx, |ui| {
+                    ctx.texture_ui(ui);
+                });
+        }
+
         let window = egui::Window::new(
             WidgetText::RichText(
                 Arc::new(RichText::new("💻 Resource Monitor").size(25.0))
             )
         );
-
-        let mut cpu_usage = None;
-        let mut memory_usage = None;
-        let mut io = None;
-
-        if let Some(process) = self.system.process(self.pid) {
-            if self.last_pull.elapsed() >= sysinfo::MINIMUM_CPU_UPDATE_INTERVAL {
-                cpu_usage = Some(format!("{}%", process.cpu_usage() / self.system.cpus().len() as f32));
-
-                self.last_pull = Instant::now();
-                self.last_cpu_usage = cpu_usage.clone();
-            } else {
-                cpu_usage = self.last_cpu_usage.clone();
-            }
-
-            io = Some(process.disk_usage());
-
-            memory_usage = Some(re_format::format_bytes(process.memory() as f64));
-        };
 
         window.default_pos(Pos2::new(200.0, 200.0))
             .min_width(150.0)
@@ -130,23 +95,7 @@ impl ResourceMonitor {
                     .min_col_width(ui.available_width() - 25.0)
                     .show(ui, |ui| {
                         let mem_allocation_hint = "How much memory has been allocated to the entire application";
-                        let cpu_hint = "How much cpu is used by the entire application";
-                        let read_hint = "How much was read from your disk by the entire application";
-                        let write_hint = "How much was written to your disk by the entire application";
-
-                        ui.label(RichText::new("System info").size(15.0).strong());
-                        ui.end_row();
-
-                        ui_non_select_label(ui, "CPU:");
-                        ui.label(self.cpu_name.clone());
-                        ui.end_row();
-
-                        ui_non_select_label(ui, "Total Memory:");
-                        ui.label(&self.total_memory);
-                        ui.end_row();
-
-                        ui.separator();
-                        ui.end_row();
+                        let cpu_hint = "Average CPU time spent processing one frame for the entire application";
 
                         ui.label(RichText::new("App usage").size(15.0).strong());
                         ui.end_row();
@@ -154,32 +103,14 @@ impl ResourceMonitor {
                         ui_non_select_label(ui, "App Mem Alloc:")
                             .on_hover_text(mem_allocation_hint);
                         ui.label(
-                            rich_text_or_unknown!(memory_usage)
+                            re_format::format_bytes(ALLOCATOR.allocated() as f64)
                         );
                         ui.end_row();
 
-                        ui_non_select_label(ui, "CPU Usage:")
+                        ui_non_select_label(ui, "Mean CPU Usage:")
                             .on_hover_text(cpu_hint);
                         ui.label(
-                            rich_text_or_unknown!(cpu_usage)
-                        );
-                        ui.end_row();
-
-                        ui_non_select_label(ui, "Total read:")
-                            .on_hover_text(read_hint);
-                        ui.label(
-                            rich_text_or_unknown!(
-                                io.map(|f| re_format::format_bytes(f.total_read_bytes as f64))
-                            )
-                        );
-                        ui.end_row();
-
-                        ui_non_select_label(ui, "Total written:")
-                            .on_hover_text(write_hint);
-                        ui.label(
-                            rich_text_or_unknown!(
-                                io.map(|f| re_format::format_bytes(f.total_written_bytes as f64))
-                            )
+                            format!("{:.2} ms / frame", 1e3 * self.mean_frame_time())
                         );
                         ui.end_row();
 
@@ -198,8 +129,42 @@ impl ResourceMonitor {
                                 ui.label(row.1.clone());
                                 ui.end_row();
                             }
+
+                            ui.end_row();
+                        }
+
+                        ui.separator();
+                        ui.end_row();
+
+                        ui.label(RichText::new("egui windows").size(15.0).strong());
+                        ui.end_row();
+
+                        for data in vec![
+                            ("Settings", &mut self.show_settings_ui),
+                            ("Inspection", &mut self.show_inspection_ui),
+                            ("Texture", &mut self.show_texture_ui),
+                            ("Memory", &mut self.show_memory_ui)
+                        ] {
+                            ui.checkbox(data.1, data.0);
+                            ui.end_row();
                         }
                     });
             });
+
+        ctx.request_repaint();
+    }
+
+    fn mean_frame_time(&self) -> f32 {
+        self.frame_times.average().unwrap_or_default()
+    }
+
+    pub fn on_new_frame(&mut self, ctx: &Context, previous_frame_time: Option<f32>) {
+        let now = ctx.input(|i| i.time);
+        let previous_frame_time = previous_frame_time.unwrap_or_default();
+        if let Some(latest) = self.frame_times.latest_mut() {
+            *latest = previous_frame_time;
+        }
+
+        self.frame_times.add(now, previous_frame_time);
     }
 }
