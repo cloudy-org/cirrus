@@ -1,5 +1,5 @@
 use cirrus_theming::v1::theme::Theme;
-use egui::{Context, Style, TextStyle};
+use egui::{Context, Style, TextStyle, ThemePreference};
 
 pub mod fonts;
 pub(crate) mod visuals;
@@ -31,6 +31,12 @@ impl<'a> Styling<'a> {
     }
 
     pub fn apply(&self, ctx: &Context) {
+        ctx.set_theme(
+            match self.theme.pallet.is_dark {
+                true => egui::Theme::Dark,
+                false => egui::Theme::Light,
+            }
+        );
         ctx.set_style(self.egui_style.clone());
     }
 }
