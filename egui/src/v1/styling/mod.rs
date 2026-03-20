@@ -1,5 +1,5 @@
 use cirrus_theming::v1::theme::Theme;
-use egui::{Context, Style, TextStyle, ThemePreference};
+use egui::{Context, Style, TextStyle};
 
 pub mod fonts;
 pub(crate) mod visuals;
