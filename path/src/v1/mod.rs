@@ -7,11 +7,17 @@ use crate::v1::error::{Error, Result};
 
 pub mod error;
 
+#[cfg(target_os = "windows")]
+const CLOUDY_FOLDER_NAME: &str = "Cloudy";
+
+#[cfg(not(target_os = "windows"))]
+const CLOUDY_FOLDER_NAME: &str = "cloudy";
+
 pub fn get_user_config_cloudy_folder_path() -> Result<PathBuf, Box<dyn CError>> {
     debug!("Finding the user's local configuration cloudy-org folder path...");
 
     match dirs::config_local_dir() {
-        Some(local_config_dir) => Ok(local_config_dir.join("cloudy")),
+        Some(local_config_dir) => Ok(local_config_dir.join(CLOUDY_FOLDER_NAME)),
         None => Err(Error::DirNotFoundForPlatform.into())
     }
 }
