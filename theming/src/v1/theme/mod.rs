@@ -84,12 +84,8 @@ impl Theme {
 
     fn get_theme_from_config(fallback_accent_colour: Colour) -> Result<Option<Self>, Error> {
         let theme_path = get_user_config_cloudy_folder_path()
-            .map_err(
-                |error| Error::FailedToFindThemeToml(
-                    error.actual_error().unwrap_or_default() // actual error will always be there so it should never default...
-                    // ..but eh, just in case — let's be a little panic safe in case this behaviour changes
-                )
-            )?.join("theme.toml");
+            .map_err(|error| Error::FailedToFindThemeToml(error.to_string()))?
+            .join("theme.toml");
 
         match theme_path.exists() {
             true => {

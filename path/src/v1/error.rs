@@ -1,5 +1,4 @@
-use std::env;
-use cirrus_error::v1::error::CError;
+use std::{env, fmt::Display};
 
 static PLATFORM: &str = env::consts::OS;
 
@@ -7,23 +6,18 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug)]
 pub enum Error {
-    DirNotFoundForPlatform
+    PathNotFoundForPlatform,
 }
 
-impl CError for Error {
-    fn human_message(&self) -> String {
+impl Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::DirNotFoundForPlatform => format!(
-                "Failed to search for directory path for your platform ({})! ",
-                PLATFORM
-            ) + "Report right away! Maybe your platform isn't supported in dirs-rs (https://codeberg.org/dirs/dirs-rs).",
-        }.to_string()
-    }
-
-    fn actual_error(&self) -> Option<String> {
-        // there's no errors at the moment that carry "actual error".
-        match self {
-            Error::DirNotFoundForPlatform => Some("Dirs-rs method returned none!".to_string()),
+            Error::PathNotFoundForPlatform => write!(
+                f,
+                "The 'dirs-rs' crate failed to find the path for your platform ({})! {}",
+                PLATFORM,
+                "Maybe your platform isn't supported, report at 'https://codeberg.org/dirs/dirs-rs'."
+            ),
         }
     }
 }

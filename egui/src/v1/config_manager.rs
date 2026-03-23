@@ -42,7 +42,10 @@ impl<'a, T: CConfig> ConfigManager<T> {
 
         let config_hash = hasher.finish();
 
-        let config_path = get_user_config_cloudy_folder_path()?.join(app_name).join("config.toml");
+        let config_path = get_user_config_cloudy_folder_path()
+            .map_err(|error| Error::UserConfigPathNotFound { error: error.to_string() })?
+            .join(app_name).join("config.toml");
+
         // Reading the config here really shouldn't fail as that would be caught by 
         // "get_and_create_config_file" but I guess just to be extra safe and panic-less 
         // let's map it to the same exact error.

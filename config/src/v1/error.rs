@@ -5,7 +5,9 @@ pub enum Error {
     FailedToCreateConfigFile(String),
     FailedToCreateConfigDirectory(String),
     FailedToReadConfig(String),
-    FailedToWriteToConfig(String)
+    FailedToWriteToConfig(String),
+
+    UserConfigPathNotFound { error: String },
 }
 
 impl CError for Error {
@@ -15,6 +17,7 @@ impl CError for Error {
             Error::FailedToCreateConfigDirectory(actual_error) => format!("Failed to create config directory! Error: {}", actual_error),
             Error::FailedToReadConfig(actual_error) => format!("Failed to read config toml file! Error: {}", actual_error),
             Error::FailedToWriteToConfig(actual_error) => format!("Failed to write to config toml file! Error: {}", actual_error),
+            Error::UserConfigPathNotFound { error } => format!("Failed to get user config path: {}", error),
         }.to_string()
     }
 
@@ -24,6 +27,7 @@ impl CError for Error {
             Error::FailedToCreateConfigDirectory(actual_error) => Some(actual_error.into()),
             Error::FailedToReadConfig(actual_error) => Some(actual_error.into()),
             Error::FailedToWriteToConfig(actual_error) => Some(actual_error.into()),
+            Error::UserConfigPathNotFound { error } => Some(error.into())
         }
     }
 }

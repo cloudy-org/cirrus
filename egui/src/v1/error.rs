@@ -10,18 +10,22 @@ use cirrus_error::v1::error::CError;
 #[derive(Debug)]
 pub enum Error {
     FailedToSaveConfig(String),
+
+    UserConfigPathNotFound { error: String },
 }
 
 impl CError for Error {
     fn human_message(&self) -> String {
         match self {
             Error::FailedToSaveConfig(actual_error) => format!("Failed to save config toml file! \n\nError: {}", actual_error),
+            Error::UserConfigPathNotFound { error } => format!("Failed to get user config path: {}", error),
         }
     }
 
     fn actual_error(&self) -> Option<String> {
         match self {
             Error::FailedToSaveConfig(actual_error) => Some(actual_error.into()),
+            Error::UserConfigPathNotFound { error } => Some(error.into())
         }
     }
 }
