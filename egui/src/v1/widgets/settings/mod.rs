@@ -131,7 +131,7 @@ impl<'a> Settings<'a> {
                 .expect(
                     "Failed to parse 'config.template.toml'! \
                     This is a build pipeline issue, report immediately!"
-                ); 
+                );
 
             // ^ I really feel like we should expect the template config to be 
             // correct and parse properly. This should generally be caught by CI and 

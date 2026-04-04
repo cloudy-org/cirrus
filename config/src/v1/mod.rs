@@ -1,5 +1,6 @@
-pub mod config;
 pub mod error;
+pub mod config;
+pub mod template;
 
 /// # ⚠️ WARNING
 /// The root of the path and `self.` is consumed.
