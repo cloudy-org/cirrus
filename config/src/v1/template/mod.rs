@@ -4,7 +4,7 @@ use toml_edit::{Document, Item, Table, TomlError, Value};
 
 use crate::v1::{error::Error, template::docstring::{KeyDocstring, parse_key_docstring}};
 
-mod docstring; // not public as this may be changed
+mod docstring; // not public as the internals of this crate may change
 
 #[derive(Debug)]
 pub struct TemplateKey {
