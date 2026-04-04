@@ -8,6 +8,7 @@ mod docstring; // not public as this may be changed
 
 #[derive(Debug)]
 pub struct TemplateKey {
+    pub key: String,
     pub docstring: KeyDocstring,
     pub defined_toml_value: Value,
 }
@@ -95,6 +96,7 @@ impl<'a> Template<'a> {
                         path.to_string(),
                         TemplateKey {
                             docstring,
+                            key: key.to_string(),
                             defined_toml_value: value.to_owned()
                         }
                     );
