@@ -1,4 +1,4 @@
-use cirrus_theming::v1::theme::Theme;
+use cirrus_theming::theme::Theme;
 use egui::{Context, Style, TextStyle};
 
 pub mod fonts;

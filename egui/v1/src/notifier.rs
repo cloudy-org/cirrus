@@ -1,6 +1,6 @@
 use std::{sync::{Arc, RwLock}, time::Duration};
 
-use cirrus_error::v1::error::CError;
+use cirrus_error::error::CError;
 use egui::Context;
 use egui_notify::{Toast, ToastLevel, Toasts};
 

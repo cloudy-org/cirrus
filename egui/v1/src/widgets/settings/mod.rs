@@ -1,5 +1,5 @@
-use cirrus_config::v1::{config::CConfig, template::Template};
-use cirrus_theming::v1::theme::Theme;
+use cirrus_config::{config::CConfig, template::Template};
+use cirrus_theming::theme::Theme;
 use egui::{Color32, Context, CornerRadius, Frame, Key, Margin, RichText, Stroke, Ui};
 use egui_notify::ToastLevel;
 

@@ -1,8 +1,8 @@
 use std::{fs, hash::{DefaultHasher, Hasher}, path::PathBuf, time::Duration};
 
-use cirrus_config::v1::{config::{get_and_create_config_file, CConfig}, error::Error as ConfigError};
-use cirrus_error::v1::error::CError;
-use cirrus_path::v1::get_user_config_cloudy_folder_path;
+use cirrus_config::{config::{get_and_create_config_file, CConfig}, error::Error as ConfigError};
+use cirrus_error::error::CError;
+use cirrus_path::get_user_config_cloudy_folder_path;
 use egui::Context;
 use egui_notify::ToastLevel;
 use log::debug;
