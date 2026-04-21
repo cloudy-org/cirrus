@@ -9,6 +9,16 @@ pub struct Contributor {
     pub git_tag: Option<GitTag>,
 }
 
+impl Default for Contributor {
+    fn default() -> Self {
+        Self {
+            name: String::from("John Doe"),
+            email: None,
+            git_tag: None
+        }
+    }
+}
+
 impl Contributor {
     // not sure if I'll make this public yet
     pub(crate) fn parse_string(contributor_string: &String) -> Result<Self> {

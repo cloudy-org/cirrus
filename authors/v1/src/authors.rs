@@ -1,5 +1,6 @@
 use crate::{contributor::Contributor, error::{Error, Result}};
 
+#[derive(Default)]
 pub struct Authors {
     pub author: Contributor,
     pub contributors: Vec<Contributor>,
