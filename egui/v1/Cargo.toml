@@ -4,10 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-cirrus_error = { path = "../error" }
-cirrus_config = { path = "../config" }
-cirrus_theming = { path = "../theming" }
-cirrus_path = { path = "../path" }
+cirrus_path = { path = "../../path" }
+cirrus_error = { path = "../../error" }
+cirrus_config = { path = "../../config" }
+cirrus_theming = { path = "../../theming" }
+cirrus_authors = { path = "../../authors/v1" }
 
 log = "0.4"
 toml = "1.1"

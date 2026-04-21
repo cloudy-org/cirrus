@@ -1,6 +1,6 @@
 use egui::{TextStyle};
 
-use crate::v1::styling::Styling;
+use crate::styling::Styling;
 
 impl Styling<'_> {
     pub fn set_fonts(&mut self, text_style: Option<TextStyle>) -> &mut Self {

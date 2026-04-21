@@ -10,7 +10,7 @@ struct InnerScheduler<T> {
 /// 
 /// ```rust
 /// use std::time::Duration;
-/// use cirrus_egui::v1::scheduler::Scheduler;
+/// use cirrus_egui::scheduler::Scheduler;
 /// 
 /// struct UwUBroadcaster {
 ///     uwu_schedule: Scheduler

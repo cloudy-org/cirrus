@@ -1,0 +1,9 @@
+[package]
+name = "cirrus_authors"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cirrus_git_tag = { path = "../../git_tag/v1" }
+
+log = "0.4.27"

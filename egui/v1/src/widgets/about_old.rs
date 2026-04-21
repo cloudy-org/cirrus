@@ -1,6 +1,8 @@
 use egui::{Color32, Context, ImageSource, Margin, OpenUrl, Pos2, Response, Stroke, Ui, Vec2};
 use serde::Deserialize;
 
+use cirrus_authors::Authors;
+
 pub struct About<'a> {
     image: ImageSource<'a>,
     info: AboutApplicationInfo,
@@ -14,7 +16,7 @@ pub struct AboutApplicationInfo {
     pub description: String,
     pub license: String,
     pub version: String,
-    pub authors: Vec<AboutAuthorInfo>,
+    pub authors: Authors,
     pub webpage: String,
     pub git_repo: String,
     pub copyright: String,
@@ -25,11 +27,6 @@ pub struct AboutAuthorInfo {
     pub name: String,
     pub github: String,
     pub email: Option<String>
-}
-
-#[derive(Deserialize)]
-struct AuthorsToml {
-    authors: Vec<AboutAuthorInfo>
 }
 
 impl<'a> About<'a> {
@@ -120,38 +117,41 @@ impl<'a> About<'a> {
                 .outer_margin(Margin::symmetric(15, 5))
                 .show(ui, |ui| {
                     egui::Grid::new("about_authors_grid")
-                        .num_columns(self.info.authors.len())
                         .min_row_height(60.0)
                         .spacing([20.0, 4.0])
                         .show(ui, |ui| {
-                            if let Some(author_info) = self.info.authors.iter().next() {
-                                let github_link = format!("https://github.com/{}", author_info.github);
+                            let author =  &self.info.authors.author;
 
-                                let image_size = Vec2::new(70.0, 70.0);
+                            // TODO: cache author image in cache directory
 
-                                let image = egui::Image::from_uri(format!("{}.png", &github_link))
+                            let author_image = match &author.git_tag {
+                                Some(git_tag) => egui::Image::from_uri(format!("{}.png", git_tag.get_owner_link())),
+                                None => egui::Image::new(
+                                    egui::include_image!("../../../../assets/no_author_image.jpg")
+                                ),
+                            };
+
+                            ui.add(
+                                author_image
                                     .corner_radius(100.0)
-                                    .fit_to_exact_size(image_size);
+                                    .fit_to_exact_size(Vec2::new(70.0, 70.0))
+                            );
 
-                                if image.load_for_size(ctx, ui.available_size()).is_ok() {
-                                    ui.add(image);
-                                } else {
-                                    let default_image = egui::Image::new(
-                                        egui::include_image!("../../../../assets/no_author_image.jpg")
-                                    )
-                                        .corner_radius(100.0)
-                                        .fit_to_exact_size(image_size);
+                            let name_label_text = egui::RichText::new(&author.name).size(18.0);
 
-                                    ui.add(default_image);
-                                }
-
-                                ui.hyperlink_to(
-                                    egui::RichText::new(author_info.name.clone())
-                                        .size(18.0),
-                                    &github_link
-                                );
-                                ui.end_row();
+                            match &author.git_tag {
+                                Some(git_tag) => {
+                                    ui.hyperlink_to(
+                                        name_label_text,
+                                        git_tag.get_owner_link()
+                                    );
+                                },
+                                None => {
+                                    ui.label(name_label_text);
+                                },
                             }
+
+                            ui.end_row();
                         }
                     );
                 }
@@ -170,23 +170,4 @@ impl<'a> About<'a> {
         });
 
     }
-}
-
-pub fn authors_toml_to_about_authors(authors_toml: &String) -> Vec<AboutAuthorInfo> {
-    let mut about_author_infos: Vec<AboutAuthorInfo> = Vec::new();
-
-    let authors = toml::from_str::<AuthorsToml>(authors_toml)
-        .expect("Failed to deserialize toml data!");
-
-    for author in authors.authors {
-        let about_author_info = AboutAuthorInfo {
-            name: author.name,
-            github: author.github,
-            email: author.email
-        };
-
-        about_author_infos.push(about_author_info);
-    }
-
-    about_author_infos
 }

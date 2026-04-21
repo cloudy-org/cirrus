@@ -8,7 +8,7 @@ use egui_notify::ToastLevel;
 use log::debug;
 use toml_edit::{Document, DocumentMut, Formatted, Item, Table, Value};
 
-use crate::v1::{error::Error, notifier::Notifier, scheduler::Scheduler};
+use crate::{error::Error, notifier::Notifier, scheduler::Scheduler};
 
 pub struct ConfigManager<T: CConfig> {
     pub config: T,

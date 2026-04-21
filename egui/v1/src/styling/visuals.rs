@@ -1,6 +1,6 @@
 use egui::{Color32, CornerRadius, Shadow, Stroke, Visuals, style::{HandleShape, Selection, Widgets}};
 
-use crate::v1::styling::Styling;
+use crate::styling::Styling;
 
 impl Styling<'_> {
     pub fn set_visuals(&mut self) -> &mut Self {

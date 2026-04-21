@@ -2,7 +2,7 @@ use std::{fmt::Display, ops::RangeInclusive};
 
 use egui::{emath::Numeric, CursorIcon, RichText, TextEdit, TextStyle, TextWrapMode, Ui, Vec2};
 
-use crate::v1::{ui_utils::combo_box::ui_strong_selectable_value, widgets::{buttons::toggle_button::ToggleButton, settings::Settings}};
+use crate::{ui_utils::combo_box::ui_strong_selectable_value, widgets::{buttons::toggle_button::ToggleButton, settings::Settings}};
 
 pub struct Section<'a, T> {
     pub(crate) config_key: &'a mut T,

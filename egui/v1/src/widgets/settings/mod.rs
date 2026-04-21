@@ -3,7 +3,7 @@ use cirrus_theming::v1::theme::Theme;
 use egui::{Color32, Context, CornerRadius, Frame, Key, Margin, RichText, Stroke, Ui};
 use egui_notify::ToastLevel;
 
-use crate::v1::{config_manager::{ConfigManager}, notifier::Notifier, widgets::settings::section::AnySection};
+use crate::{config_manager::{ConfigManager}, notifier::Notifier, widgets::settings::section::AnySection};
 
 pub mod section;
 
