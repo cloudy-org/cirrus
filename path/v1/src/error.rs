@@ -14,9 +14,8 @@ impl Display for Error {
         match self {
             Error::PathNotFoundForPlatform => write!(
                 f,
-                "The 'dirs-rs' crate failed to find the path for your platform ({})! {}",
-                PLATFORM,
-                "Maybe your platform isn't supported, report at 'https://codeberg.org/dirs/dirs-rs'."
+                "This path is not supported for your platform yet ({PLATFORM}) in 'cirrus_path'! \
+                    Feel free to add support or report it here: https://github.com/cloudy-org/cirrus",
             ),
         }
     }
