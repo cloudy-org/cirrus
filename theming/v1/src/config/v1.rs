@@ -1,17 +1,23 @@
 use serde::{Deserialize};
 
-use crate::{colour::Colour, error::Error, pallet::{ColourPallet, DEFAULT_ACCENT_HEX, TRANSPARENT_HEX}, theme::Theme};
+use crate::{colour::Colour, error::Error, pallet::{ColourPallet, TRANSPARENT_HEX}, theme::Theme};
 
 #[derive(Deserialize)]
 pub struct ThemeConfigV1 {
     #[allow(dead_code)]
     version: i8,
     dark_mode: bool,
-    pallet: ThemePalletV1
+    metadata: Metadata,
+    pallet: ThemePallet,
 }
 
 #[derive(Deserialize)]
-struct ThemePalletV1 {
+struct Metadata {
+    pub name: String,
+}
+
+#[derive(Deserialize)]
+struct ThemePallet {
     #[serde(default)]
     pub primary: Option<String>,
     #[serde(default)]
@@ -26,7 +32,7 @@ struct ThemePalletV1 {
 
 pub fn parse(toml_string: &str, fallback_accent_colour: Colour) -> Result<Theme, Error> {
     let theme_config: ThemeConfigV1 = toml::from_str(&toml_string)
-        .map_err(|error| Error::FailedToReadThemeToml(error.to_string()))?;
+        .map_err(|error| Error::ThemeTomlParseFailure { error: error.to_string() })?;
 
     let is_dark = theme_config.dark_mode;
     let theme_pallet = theme_config.pallet;
@@ -63,6 +69,7 @@ pub fn parse(toml_string: &str, fallback_accent_colour: Colour) -> Result<Theme,
 
     Ok(
         Theme {
+            name: theme_config.metadata.name,
             pallet: ColourPallet {
                 is_dark: theme_config.dark_mode,
                 primary: primary_colour,

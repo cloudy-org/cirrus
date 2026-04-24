@@ -1,7 +1,7 @@
 use crate::colour::Colour;
 
-pub static DEFAULT_ACCENT_HEX: u32 = 0x7afff8;
 pub static TRANSPARENT_HEX: u32 = 0xFF000000;
+pub static DEFAULT_ACCENT_HEX: u32 = 0x7afff8;
 
 #[derive(Clone)]
 pub struct ColourPallet {
@@ -19,7 +19,7 @@ pub struct ColourPallet {
     /// Foreground text colour.
     pub text: Colour,
     /// Accent is the strongest emphasis colour. It's used in interactive 
-    /// elements like buttons, sliders, highlights and it's also sometimes used
+    /// elements like buttons, sliders, highlights and it's also sometimes used 
     /// as the stroke colour when drawing certain patterns and in loading animations.
     pub accent: Colour,
 }
