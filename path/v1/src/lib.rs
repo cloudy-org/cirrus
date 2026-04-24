@@ -1,7 +1,5 @@
 use std::path::PathBuf;
 
-use log::debug;
-
 use crate::error::{Error, Result};
 
 pub mod error;
@@ -16,7 +14,7 @@ const CLOUDY_FOLDER_NAME: &str = "cloudy";
 /// 
 /// **Windows:** `C:\Users\{user}\AppData\Local\Cloudy`
 pub fn get_user_config_cloudy_folder_path() -> Result<PathBuf> {
-    debug!("Getting user's local configuration cloudy-org folder...");
+    log::trace!("Getting user's local configuration cloudy-org folder...");
 
     match dirs::config_local_dir() {
         Some(local_config_dir) => Ok(local_config_dir.join(CLOUDY_FOLDER_NAME)),
@@ -28,7 +26,7 @@ pub fn get_user_config_cloudy_folder_path() -> Result<PathBuf> {
 /// 
 /// **Windows:** `C:\Users\{user}\AppData\Local\Cloudy`
 pub fn get_user_cache_cloudy_folder_path() -> Result<PathBuf> {
-    debug!("Getting user's local cache cloudy-org folder...");
+    log::trace!("Getting user's local cache cloudy-org folder...");
 
     match dirs::cache_dir() {
         Some(cache_dir) => Ok(cache_dir.join(CLOUDY_FOLDER_NAME)),
@@ -40,7 +38,7 @@ pub fn get_user_cache_cloudy_folder_path() -> Result<PathBuf> {
 /// 
 /// **Windows:** `C:\Users\{user}\AppData\Local\Cloudy\themes`
 pub fn get_user_cloudy_themes_folder_path() -> Result<PathBuf> {
-    debug!("Getting user's cloudy-org theme folder...");
+    log::trace!("Getting user's cloudy-org theme folder...");
 
     match dirs::data_local_dir() {
         Some(local_data_dir) => Ok(local_data_dir.join(CLOUDY_FOLDER_NAME).join("themes")),
@@ -52,7 +50,7 @@ pub fn get_user_cloudy_themes_folder_path() -> Result<PathBuf> {
 /// 
 /// This path should never be created! The package manager will create this path for us, we just read it for discovery.
 pub fn get_system_cloudy_themes_folder_paths() -> Result<Vec<PathBuf>> {
-    debug!("Getting system cloudy-org folders that could contain themes...");
+    log::trace!("Getting system cloudy-org folders that could contain themes...");
 
     #[cfg(target_os = "linux")]
     {
