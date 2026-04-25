@@ -39,23 +39,18 @@ impl ThemeManager {
         if let Ok(theme_name) = env::var("CTK_THEME") {
             log::debug!("Getting theme from environment variable...");
 
-            let theme_name = theme_name.to_lowercase();
-
             let theme_fallbacks = &self.fallbacks;
 
-            if "light" == theme_name {
-                self.theme = Theme::default_light(theme_fallbacks);
-                self.origin = Some(ThemeOrigin::EnvVar);
-                return self;
-            }
+            let theme: Option<Theme> = match theme_name.to_lowercase().as_str() {
+                "dark" => Some(Theme::default_dark(theme_fallbacks)),
+                "light" => Some(Theme::default_light(theme_fallbacks)),
+                theme_code_name => find_theme_in_system(
+                    theme_code_name.to_string(),
+                    &theme_fallbacks.pallet
+                )
+            };
 
-            if "dark" == theme_name {
-                self.theme = Theme::default_dark(theme_fallbacks);
-                self.origin = Some(ThemeOrigin::EnvVar);
-                return self;
-            }
-
-            if let Some(found_theme) = find_theme_in_system(theme_name, &theme_fallbacks.pallet) {
+            if let Some(found_theme) = theme {
                 self.theme = found_theme;
                 self.origin = Some(ThemeOrigin::EnvVar);
                 return self;

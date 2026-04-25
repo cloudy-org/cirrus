@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
 use cirrus_path::{get_system_cloudy_themes_folder_paths, get_user_cloudy_themes_folder_path};
 
@@ -18,36 +18,17 @@ pub fn find_theme_in_system(theme_code_name: String, pallet_fallbacks: &ThemePal
     );
 
     for themes_path in themes_paths {
-        match fs::read_dir(&themes_path) {
-            Ok(themes_read_dir) => {
-                for theme_folder_dir_entry in themes_read_dir {
-                    if let Ok(theme_folder_dir_entry) = theme_folder_dir_entry {
-                        if theme_folder_dir_entry.file_name().to_string_lossy().to_lowercase() == theme_code_name.to_lowercase() {
-                            let theme_path = theme_folder_dir_entry.path();
+        let theme_path = themes_path.join(theme_code_name.to_lowercase());
 
-                            return match Theme::parse_from_path(theme_path, pallet_fallbacks) {
-                                Ok(theme) => Some(theme),
-                                Err(error) => {
-                                    log::error!("{}", error);
+        if theme_path.is_dir() {
+            return match Theme::parse_from_path(theme_path, pallet_fallbacks) {
+                Ok(theme) => Some(theme),
+                Err(error) => {
+                    log::error!("{}", error);
 
-                                    None
-                                },
-                            };
-                        }
-                    }
-                }
-
-                continue;
-            },
-            Err(error) => {
-                log::warn!(
-                    "Failed to read themes path '{}'! \
-                        Skipping this directory... \n\nError: {error}",
-                    themes_path.display()
-                );
-
-                continue;
-            },
+                    None
+                },
+            };
         }
     }
 
