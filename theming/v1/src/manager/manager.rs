@@ -3,7 +3,7 @@ use std::{env, fs, path::PathBuf};
 use toml::Table;
 use cirrus_path::get_user_config_cloudy_folder_path;
 
-use crate::{colour::Colour, error::{Error, Result}, fallbacks::ThemeFallbacks, manager::origin::ThemeOrigin, pallet::DEFAULT_ACCENT_HEX, system::find_theme_in_system, theme::Theme};
+use crate::{colour::Colour, error::{Error, Result}, fallbacks::{ThemeFallbacks, ThemePalletFallbacks}, manager::origin::ThemeOrigin, pallet::DEFAULT_ACCENT_HEX, system::find_theme_in_system, theme::Theme};
 
 /// ⚠️ Keep in mind this struct is unstable and may change soon with breaking changes.
 pub struct ThemeManager {
@@ -17,18 +17,20 @@ pub struct ThemeManager {
 impl Default for ThemeManager {
     fn default() -> Self {
         Self {
-            theme: Theme::default_dark(),
+            theme: Theme::default_dark(&ThemeFallbacks::default()),
             fallbacks: ThemeFallbacks::default(),
-            origin: None,
+            origin: None
         }
     }
 }
 
 impl ThemeManager {
-    pub fn set_fallbacks(mut self, fallbacks: ThemeFallbacks) -> Self {
-        self.fallbacks = fallbacks;
-
-        self
+    pub fn default_with_fallbacks(fallbacks: ThemeFallbacks) -> Self {
+        Self {
+            theme: Theme::default_dark(&fallbacks),
+            fallbacks: fallbacks,
+            origin: None,
+        }
     }
 
     pub fn get_theme_from_env(mut self) -> Self {
@@ -39,19 +41,21 @@ impl ThemeManager {
 
             let theme_name = theme_name.to_lowercase();
 
+            let theme_fallbacks = &self.fallbacks;
+
             if "light" == theme_name {
-                self.theme = Theme::default_light();
+                self.theme = Theme::default_light(theme_fallbacks);
                 self.origin = Some(ThemeOrigin::EnvVar);
                 return self;
             }
 
             if "dark" == theme_name {
-                self.theme = Theme::default_dark();
+                self.theme = Theme::default_dark(theme_fallbacks);
                 self.origin = Some(ThemeOrigin::EnvVar);
                 return self;
             }
 
-            if let Some(found_theme) = find_theme_in_system(theme_name, &self.fallbacks) {
+            if let Some(found_theme) = find_theme_in_system(theme_name, &theme_fallbacks.pallet) {
                 self.theme = found_theme;
                 self.origin = Some(ThemeOrigin::EnvVar);
                 return self;
@@ -78,9 +82,9 @@ impl ThemeManager {
             }
 
             // TODO: Fetch system accent colour.
-            self.fallbacks.accent_colour = Colour::from_hex(DEFAULT_ACCENT_HEX);
+            self.fallbacks.pallet.accent_colour = Colour::from_hex(DEFAULT_ACCENT_HEX);
 
-            match find_theme_from_config(config_path, &self.fallbacks) {
+            match find_theme_from_config(config_path, &self.fallbacks.pallet) {
                 Ok(Some(theme)) => {
                     self.theme = theme;
                     self.origin = Some(ThemeOrigin::Config);
@@ -96,7 +100,7 @@ impl ThemeManager {
     }
 }
 
-fn find_theme_from_config(config_path: PathBuf, fallbacks: &ThemeFallbacks) -> Result<Option<Theme>, Error> {
+fn find_theme_from_config(config_path: PathBuf, pallet_fallbacks: &ThemePalletFallbacks) -> Result<Option<Theme>, Error> {
     log::debug!("Checking global config toml for set theme...");
 
     // TODO: we should use the cirrus_config crate when it get's support for this global config. 
@@ -109,7 +113,7 @@ fn find_theme_from_config(config_path: PathBuf, fallbacks: &ThemeFallbacks) -> R
     if let Some(theme_code_name_value) = generic_config_table.get("theme") {
         if let Some(theme_code_name) = theme_code_name_value.as_str() {
             return Ok(
-                find_theme_in_system(theme_code_name.to_string(), fallbacks)
+                find_theme_in_system(theme_code_name.to_string(), pallet_fallbacks)
             );
         }
 

@@ -2,9 +2,9 @@ use std::{fs, path::PathBuf};
 
 use cirrus_path::{get_system_cloudy_themes_folder_paths, get_user_cloudy_themes_folder_path};
 
-use crate::{fallbacks::ThemeFallbacks, theme::Theme};
+use crate::{fallbacks::ThemePalletFallbacks, theme::Theme};
 
-pub fn find_theme_in_system(theme_code_name: String, fallbacks: &ThemeFallbacks) -> Option<Theme> {
+pub fn find_theme_in_system(theme_code_name: String, pallet_fallbacks: &ThemePalletFallbacks) -> Option<Theme> {
     log::debug!("Searching for the cloudy-org theme '{}' on this system...", theme_code_name);
 
     let mut themes_paths: Vec<PathBuf> = Vec::new();
@@ -25,7 +25,7 @@ pub fn find_theme_in_system(theme_code_name: String, fallbacks: &ThemeFallbacks)
                         if theme_folder_dir_entry.file_name().to_string_lossy().to_lowercase() == theme_code_name.to_lowercase() {
                             let theme_path = theme_folder_dir_entry.path();
 
-                            return match Theme::parse_from_path(theme_path, fallbacks) {
+                            return match Theme::parse_from_path(theme_path, pallet_fallbacks) {
                                 Ok(theme) => Some(theme),
                                 Err(error) => {
                                     log::error!("{}", error);

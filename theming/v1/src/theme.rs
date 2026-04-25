@@ -2,7 +2,7 @@ use std::{fs, path::PathBuf};
 
 use toml::Table;
 
-use crate::{config, error::{Error, Result}, fallbacks::ThemeFallbacks, pallet::ColourPallet};
+use crate::{config, error::{Error, Result}, fallbacks::{ThemeFallbacks, ThemePalletFallbacks}, pallet::ColourPallet};
 
 // TODO: Document Theme struct
 #[derive(Clone)]
@@ -12,21 +12,21 @@ pub struct Theme {
 }
 
 impl Theme {
-    pub fn default_dark() -> Self {
+    pub fn default_dark(fallbacks: &ThemeFallbacks) -> Self {
         Self {
             name: String::from("Dark"),
-            pallet: ColourPallet::default_dark(),
+            pallet: ColourPallet::default_dark(fallbacks.pallet.accent_colour),
         }
     }
 
-    pub fn default_light() -> Self {
+    pub fn default_light(fallbacks: &ThemeFallbacks) -> Self {
         Self {
             name: String::from("Light"),
-            pallet: ColourPallet::default_light(),
+            pallet: ColourPallet::default_light(fallbacks.pallet.accent_colour),
         }
     }
 
-    pub(crate) fn parse_from_path(theme_path: PathBuf, fallbacks: &ThemeFallbacks) -> Result<Self> {
+    pub(crate) fn parse_from_path(theme_path: PathBuf, pallet_fallbacks: &ThemePalletFallbacks) -> Result<Self> {
         log::debug!("Parsing theme from path '{}'...", &theme_path.display());
 
         let theme_code_name = theme_path.file_name()
@@ -67,7 +67,7 @@ impl Theme {
         match generic_theme_table.get("version") {
             Some(theme_version) => {
                 match theme_version.as_integer() {
-                    Some(1) => Ok(config::v1::parse(&toml_string, fallbacks)?),
+                    Some(1) => Ok(config::v1::parse(&toml_string, pallet_fallbacks)?),
                     _ => Err(Error::ThemeTomlUnsupported { version: theme_version.to_string() }),
                 }
             },

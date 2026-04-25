@@ -1,6 +1,6 @@
 use serde::{Deserialize};
 
-use crate::{colour::Colour, error::Error, fallbacks::ThemeFallbacks, pallet::{ColourPallet, TRANSPARENT_HEX}, theme::Theme};
+use crate::{colour::Colour, error::Error, fallbacks::ThemePalletFallbacks, pallet::{ColourPallet, TRANSPARENT_HEX}, theme::Theme};
 
 #[derive(Deserialize)]
 pub struct ThemeConfigV1 {
@@ -30,7 +30,7 @@ struct ThemePallet {
     pub accent: Option<String>,
 }
 
-pub fn parse(toml_string: &str, fallbacks: &ThemeFallbacks) -> Result<Theme, Error> {
+pub fn parse(toml_string: &str, pallet_fallbacks: &ThemePalletFallbacks) -> Result<Theme, Error> {
     let theme_config: ThemeConfigV1 = toml::from_str(&toml_string)
         .map_err(|error| Error::ThemeTomlParseFailure { error: error.to_string() })?;
 
@@ -64,7 +64,7 @@ pub fn parse(toml_string: &str, fallbacks: &ThemeFallbacks) -> Result<Theme, Err
 
     let accent_colour = match theme_pallet.accent {
         Some(hex_string) => Colour::try_from(hex_string)?,
-        None => fallbacks.accent_colour,
+        None => pallet_fallbacks.accent_colour,
     };
 
     Ok(

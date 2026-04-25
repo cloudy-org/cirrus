@@ -1,7 +1,7 @@
-use crate::colour::Colour;
+use crate::{colour::Colour};
 
-pub static TRANSPARENT_HEX: u32 = 0xFF000000;
-pub static DEFAULT_ACCENT_HEX: u32 = 0x7afff8;
+pub(crate) static TRANSPARENT_HEX: u32 = 0xFF000000;
+pub(crate) static DEFAULT_ACCENT_HEX: u32 = 0x7afff8;
 
 #[derive(Clone)]
 pub struct ColourPallet {
@@ -25,25 +25,25 @@ pub struct ColourPallet {
 }
 
 impl ColourPallet {
-    pub fn default_dark() -> Self {
+    pub(crate) fn default_dark(accent_colour: Colour) -> Self {
         Self {
             is_dark: true,
             primary: Colour::from_hex(0x0A0A0A),
             interactive: Colour::from_hex(0x2E2E2E),
             surface: Colour::from_hex(0x3C3939),
             text: Colour::from_hex(0xb5b5b5),
-            accent: Colour::from_hex(DEFAULT_ACCENT_HEX)
+            accent: accent_colour
         }
     }
 
-    pub fn default_light() -> Self {
+    pub(crate) fn default_light(accent_colour: Colour) -> Self {
         Self {
             is_dark: false,
             primary: Colour::from_hex(0xD5EBEB),
             interactive: Colour::from_hex(0xA6C4E3),
             surface: Colour::from_hex(0xB8E2FF),
             text: Colour::from_hex(0x242424),
-            accent: Colour::from_hex(DEFAULT_ACCENT_HEX)
+            accent: accent_colour
         }
     }
 }
