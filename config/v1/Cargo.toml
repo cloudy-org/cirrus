@@ -1,0 +1,13 @@
+[package]
+name = "cirrus_config"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cirrus_path = {path = "../../path/v1"}
+cirrus_error = {path = "../../error/v1"}
+
+log = "0.4"
+toml = "1.1"
+toml_edit = "0.25"
+serde = {version = "1.0", features = ["derive"]}

@@ -1,0 +1,13 @@
+version = 1
+
+# Adjust this value to limit the maximum amount of 🐈 cats that are allowed to spawn in.
+# 
+# You can lower this if you're experiencing performance issues.
+# 
+# Do not set this value too high or else a "🐈 Kitten Overload" event could occur where the 
+# 🐈 kitties multiply beyond your control, steal your processing power and establish 
+# a new world order. Kind regards.
+max_meows = 15
+
+# If you enable this, the AI will eventually kill us all.
+allow_sentient_ai = true

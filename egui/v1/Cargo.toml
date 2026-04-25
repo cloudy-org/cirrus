@@ -1,0 +1,22 @@
+[package]
+name = "cirrus_egui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cirrus_path = { path = "../../path/v1" }
+cirrus_error = { path = "../../error/v1" }
+cirrus_config = { path = "../../config/v1" }
+cirrus_theming = { path = "../../theming/v1" }
+cirrus_authors = { path = "../../authors/v1" }
+
+log = "0.4"
+toml = "1.1"
+toml_edit = "0.25"
+egui = "0.33"
+textwrap = "0.16"
+egui-notify = "0.21"
+serde = { version = "1.0", features = ["derive"] }
+
+cap = "0.1.2"
+re_format = "0.23.1"
