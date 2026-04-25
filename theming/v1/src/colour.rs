@@ -1,6 +1,6 @@
 use crate::error::Error;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Colour {
     pub hex: u32
 }

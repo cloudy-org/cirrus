@@ -2,7 +2,7 @@ use std::{fs, path::PathBuf};
 
 use toml::Table;
 
-use crate::{colour::Colour, config, error::{Error, Result}, pallet::ColourPallet};
+use crate::{config, error::{Error, Result}, fallbacks::ThemeFallbacks, pallet::ColourPallet};
 
 // TODO: Document Theme struct
 #[derive(Clone)]
@@ -26,7 +26,7 @@ impl Theme {
         }
     }
 
-    pub(crate) fn parse_from_path(theme_path: PathBuf, fallback_accent_colour: Colour) -> Result<Self> {
+    pub(crate) fn parse_from_path(theme_path: PathBuf, fallbacks: &ThemeFallbacks) -> Result<Self> {
         log::debug!("Parsing theme from path '{}'...", &theme_path.display());
 
         let theme_code_name = theme_path.file_name()
@@ -67,7 +67,7 @@ impl Theme {
         match generic_theme_table.get("version") {
             Some(theme_version) => {
                 match theme_version.as_integer() {
-                    Some(1) => Ok(config::v1::parse(&toml_string, fallback_accent_colour)?),
+                    Some(1) => Ok(config::v1::parse(&toml_string, fallbacks)?),
                     _ => Err(Error::ThemeTomlUnsupported { version: theme_version.to_string() }),
                 }
             },

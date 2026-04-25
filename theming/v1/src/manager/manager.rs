@@ -1,28 +1,36 @@
 use std::{env, fs, path::PathBuf};
 
-use cirrus_path::{get_system_cloudy_themes_folder_paths, get_user_cloudy_themes_folder_path, get_user_config_cloudy_folder_path};
 use toml::Table;
+use cirrus_path::get_user_config_cloudy_folder_path;
 
-use crate::{colour::Colour, error::{Error, Result}, manager::{origin::ThemeOrigin}, pallet::DEFAULT_ACCENT_HEX, theme::Theme};
+use crate::{colour::Colour, error::{Error, Result}, fallbacks::ThemeFallbacks, manager::origin::ThemeOrigin, pallet::DEFAULT_ACCENT_HEX, system::find_theme_in_system, theme::Theme};
 
 /// ⚠️ Keep in mind this struct is unstable and may change soon with breaking changes.
 pub struct ThemeManager {
     pub theme: Theme,
 
+    fallbacks: ThemeFallbacks,
     // might make this public soon
-    origin: Option<ThemeOrigin>
+    origin: Option<ThemeOrigin>,
 }
 
 impl Default for ThemeManager {
     fn default() -> Self {
         Self {
             theme: Theme::default_dark(),
-            origin: None
+            fallbacks: ThemeFallbacks::default(),
+            origin: None,
         }
     }
 }
 
 impl ThemeManager {
+    pub fn set_fallbacks(mut self, fallbacks: ThemeFallbacks) -> Self {
+        self.fallbacks = fallbacks;
+
+        self
+    }
+
     pub fn get_theme_from_env(mut self) -> Self {
         // TODO: this will be upgraded to support multiple predefined cirrus themes in the future 
         // (E.g: "CTK_THEME=candy_crush"). For now we'll just support our default dark and light themes.
@@ -43,9 +51,11 @@ impl ThemeManager {
                 return self;
             }
 
-            log::warn!(
-                "Alternative themes are not supported yet in cirrus via environment variables!"
-            );
+            if let Some(found_theme) = find_theme_in_system(theme_name, &self.fallbacks) {
+                self.theme = found_theme;
+                self.origin = Some(ThemeOrigin::EnvVar);
+                return self;
+            }
         }
 
         return self;
@@ -68,9 +78,9 @@ impl ThemeManager {
             }
 
             // TODO: Fetch system accent colour.
-            let system_accent_colour = Colour::from_hex(DEFAULT_ACCENT_HEX);
+            self.fallbacks.accent_colour = Colour::from_hex(DEFAULT_ACCENT_HEX);
 
-            match find_theme_from_config(config_path, system_accent_colour) {
+            match find_theme_from_config(config_path, &self.fallbacks) {
                 Ok(Some(theme)) => {
                     self.theme = theme;
                     self.origin = Some(ThemeOrigin::Config);
@@ -86,7 +96,7 @@ impl ThemeManager {
     }
 }
 
-fn find_theme_from_config(config_path: PathBuf, system_accent_colour: Colour) -> Result<Option<Theme>, Error> {
+fn find_theme_from_config(config_path: PathBuf, fallbacks: &ThemeFallbacks) -> Result<Option<Theme>, Error> {
     log::debug!("Checking global config toml for set theme...");
 
     // TODO: we should use the cirrus_config crate when it get's support for this global config. 
@@ -99,7 +109,7 @@ fn find_theme_from_config(config_path: PathBuf, system_accent_colour: Colour) ->
     if let Some(theme_code_name_value) = generic_config_table.get("theme") {
         if let Some(theme_code_name) = theme_code_name_value.as_str() {
             return Ok(
-                find_theme_in_system(theme_code_name.to_string(), system_accent_colour)
+                find_theme_in_system(theme_code_name.to_string(), fallbacks)
             );
         }
 
@@ -111,90 +121,4 @@ fn find_theme_from_config(config_path: PathBuf, system_accent_colour: Colour) ->
     };
 
     Ok(None)
-}
-
-fn find_theme_in_system(theme_code_name: String, system_accent_colour: Colour) -> Option<Theme> {
-    log::debug!("Searching for the cloudy-org theme '{}' on this system...", theme_code_name);
-
-    // TODO: improve my testing code
-
-    match get_user_cloudy_themes_folder_path() {
-        Ok(user_themes_path) => {
-            match fs::read_dir(&user_themes_path) {
-                Ok(theme_folders) => {
-                    for theme_folder in theme_folders {
-                        if let Ok(theme_folder) = theme_folder {
-                            if theme_folder.file_name().to_string_lossy().to_lowercase() == theme_code_name.to_lowercase() {
-                                let theme_path = theme_folder.path();
-
-                                return match Theme::parse_from_path(theme_path, system_accent_colour) {
-                                    Ok(theme) => Some(theme),
-                                    Err(error) => {
-                                        log::error!("{}", error);
-
-                                        None
-                                    },
-                                };
-                            }
-                        }
-                    }
-                },
-                Err(error) => {
-                    log::warn!(
-                        "Failed to read themes path '{}'! \
-                            Skipping this directory... \n\nError: {error}",
-                        user_themes_path.display()
-                    );
-                },
-            }
-        },
-        Err(error) => {
-            log::error!(
-                "Could not get local user themes path! \n\nError: {error}"
-            );
-        },
-    }
-
-    let system_themes_paths = get_system_cloudy_themes_folder_paths()
-        .unwrap_or_default();
-
-    for system_theme_path in system_themes_paths {
-        match fs::read_dir(&system_theme_path) {
-            Ok(theme_folders) => {
-                for theme_folder in theme_folders {
-                    if let Ok(theme_folder) = theme_folder {
-                        if theme_folder.file_name().to_string_lossy().to_lowercase() == theme_code_name.to_lowercase() {
-                            let theme_path = theme_folder.path();
-
-                            return match Theme::parse_from_path(theme_path, system_accent_colour) {
-                                Ok(theme) => Some(theme),
-                                Err(error) => {
-                                    log::error!("{}", error);
-
-                                    None
-                                },
-                            };
-                        }
-                    }
-                }
-
-                continue;
-            },
-            Err(error) => {
-                log::warn!(
-                    "Failed to read themes path '{}'! \
-                        Skipping this directory... \n\nError: {error}",
-                    system_theme_path.display()
-                );
-
-                continue;
-            },
-        }
-    }
-
-    log::warn!(
-        "The theme '{theme_code_name}' was not found in the system!"
-    );
-
-    return None;
 }
