@@ -9,12 +9,9 @@ pub enum Error {
     ThemeTomlNoVersionKey { theme_code_name: String, theme_toml_path: PathBuf },
 
     PathNotATheme { path: PathBuf },
-    ReadThemesPathFailure { themes_path: PathBuf, error: String },
 
     GlobalConfigParseFailure { error: String },
     HexCodeParseFailure { error: String, hex_string: String },
-
-    FailedToFindThemeToml { error: String },
 }
 
 impl Display for Error {
@@ -42,17 +39,9 @@ impl Display for Error {
                 "The path at '{}' was not a theme!",
                 path.display()
             ),
-            Error::ReadThemesPathFailure { themes_path, error } => write!(
-                f,
-                "Failed to read themes path '{}'! \n\nError: {error}",
-                themes_path.to_string_lossy()
-            ),
             Error::GlobalConfigParseFailure { error } => write!(
                 f, "Failed to read the global cloudy config file ('~/.config/cloudy/config.toml'), \
                 it may be corrupted or the reason below may state otherwise! \n\nError: {error}",
-            ),
-            Error::FailedToFindThemeToml { error } => write!(
-                f, "Failed to find the 'theme.toml' config file! \n\nError: '{error}'",
             ),
         }
     }
