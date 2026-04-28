@@ -29,7 +29,7 @@ impl<'a> Template<'a> {
         }
     }
 
-    /// Will error if parsing fails but really that should never be the case if CI tests 
+    /// Will error if parsing fails, however that really shouldn't be the case if CI tests 
     /// are in place to ensure parsing the template passes. Feel free to `.unwrap()` this.
     pub fn parse_keys(&mut self) -> Result<(), Error> {
         let mut template_keys: TemplateKeys = HashMap::new();
@@ -40,11 +40,6 @@ impl<'a> Template<'a> {
             .map_err(
                 |error: TomlError| Error::TemplateConfigParseFailure { error: error.to_string() }
             )?;
-
-        // ^ I really feel like we should expect the template config to be 
-        // correct and parse properly. This should generally be caught by CI and 
-        // I would consider such a problem more of a "build pipeline issue" rather 
-        // than a normal runtime error that should be handled.
 
         let toml_table = document.as_table();
 
