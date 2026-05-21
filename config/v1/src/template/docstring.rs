@@ -33,9 +33,17 @@ pub fn parse_key_docstring(toml_string: &str, key_line_number: usize) -> KeyDocs
     docstring_lines.reverse();
 
     KeyDocstring {
-        description: KeyDocstringDescription {
-            short: None, // TODO: implement short (brief) description.
-            long: Some(docstring_lines.join(" ")),
+        description: match docstring_lines.is_empty() {
+            true => KeyDocstringDescription {
+                short: None,
+                long: None,
+            },
+            false => {
+                KeyDocstringDescription {
+                    short: None, // TODO: implement short (brief) description.
+                    long: Some(docstring_lines.join(" ")),
+                }
+            },
         },
     }
 }

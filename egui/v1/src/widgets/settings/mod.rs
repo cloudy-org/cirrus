@@ -152,7 +152,7 @@ impl<'a> Settings<'a> {
                                             match chars.next() {
                                                 Some(first_char) => format!(
                                                     "{}{} ",
-                                                    first_char.to_uppercase().collect::<String>(),
+                                                    first_char.to_uppercase().to_string(),
                                                     chars.as_str()
                                                 ),
                                                 None => String::new(),

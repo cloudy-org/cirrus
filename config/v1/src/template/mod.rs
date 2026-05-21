@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use toml_edit::{Document, Item, Table, TomlError, Value};
 
@@ -13,7 +13,7 @@ pub struct TemplateKey {
     pub defined_toml_value: Value,
 }
 
-pub type TemplateKeys = HashMap<String, TemplateKey>;
+pub type TemplateKeys = BTreeMap<String, TemplateKey>;
 
 pub struct Template<'a> {
     pub keys: Option<TemplateKeys>,
@@ -32,7 +32,7 @@ impl<'a> Template<'a> {
     /// Will error if parsing fails, however that really shouldn't be the case if CI tests 
     /// are in place to ensure parsing the template passes. Feel free to `.unwrap()` this.
     pub fn parse_keys(&mut self) -> Result<(), Error> {
-        let mut template_keys: TemplateKeys = HashMap::new();
+        let mut template_keys: TemplateKeys = BTreeMap::new();
 
         let toml_string = self.template_config_toml_string;
 
