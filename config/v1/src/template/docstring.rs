@@ -44,9 +44,19 @@ pub fn parse_key_docstring(toml_string: &str, key_line_number: usize) -> KeyDocs
                 long: None,
             },
             false => {
+                let constructed_docstring: String = docstring_lines.iter()
+                    .map(|line| {
+                        match *line {
+                            // don't append space if new line
+                            "\n\n" => line.to_string(),
+                            other_line => format!("{} ", other_line)
+                        }
+                    })
+                    .collect();
+
                 KeyDocstringDescription {
                     short: None, // TODO: implement short (brief) description.
-                    long: Some(docstring_lines.join(" ")),
+                    long: Some(constructed_docstring),
                 }
             },
         },
