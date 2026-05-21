@@ -16,7 +16,9 @@ pub struct TemplateKey {
 pub type TemplateKeys = BTreeMap<String, TemplateKey>;
 
 pub struct Template<'a> {
+    // umm, should Option be removed?
     pub keys: Option<TemplateKeys>,
+    pub ordered_paths: Vec<String>,
 
     template_config_toml_string: &'a str,
 }
@@ -25,6 +27,7 @@ impl<'a> Template<'a> {
     pub fn new(toml_template_string: &'a str) -> Self {
         Self {
             keys: None,
+            ordered_paths: Vec::new(),
             template_config_toml_string: toml_template_string
         }
     }
@@ -32,6 +35,7 @@ impl<'a> Template<'a> {
     /// Will error if parsing fails, however that really shouldn't be the case if CI tests 
     /// are in place to ensure parsing the template passes. Feel free to `.unwrap()` this.
     pub fn parse_keys(&mut self) -> Result<(), Error> {
+        let mut ordered_key_paths: Vec<String> = Vec::new();
         let mut template_keys: TemplateKeys = BTreeMap::new();
 
         let toml_string = self.template_config_toml_string;
@@ -47,10 +51,12 @@ impl<'a> Template<'a> {
             toml_string,
             None,
             toml_table,
+            &mut ordered_key_paths,
             &mut template_keys
         );
 
         self.keys = Some(template_keys);
+        self.ordered_paths = ordered_key_paths;
 
         Ok(())
     }
@@ -60,6 +66,7 @@ impl<'a> Template<'a> {
         toml_string: &'a str,
         path: Option<&String>,
         toml_table: &Table,
+        ordered_key_paths: &mut Vec<String>,
         template_keys: &mut TemplateKeys
     ) {
         for (key, item) in toml_table.iter() {
@@ -87,8 +94,12 @@ impl<'a> Template<'a> {
 
                     let docstring = parse_key_docstring(toml_string, line_number);
 
+                    let key_path = path.to_string();
+
+                    ordered_key_paths.push(key_path.clone());
+
                     template_keys.insert(
-                        path.to_string(),
+                        key_path,
                         TemplateKey {
                             docstring,
                             key: key.to_string(),
@@ -100,6 +111,7 @@ impl<'a> Template<'a> {
                     toml_string,
                     Some(path),
                     table,
+                    ordered_key_paths,
                     template_keys
                 ),
                 Item::ArrayOfTables(array_of_tables) => {
@@ -110,6 +122,7 @@ impl<'a> Template<'a> {
                             toml_string,
                             Some(path),
                             child_table,
+                            ordered_key_paths,
                             template_keys
                         )
                     }
