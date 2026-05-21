@@ -21,7 +21,12 @@ pub fn parse_key_docstring(toml_string: &str, key_line_number: usize) -> KeyDocs
         let line = lines[index as usize].trim_start();
 
         if line.starts_with('#') {
-            let formatted_line = line.trim_start_matches('#').trim_start().trim_end();
+            let mut formatted_line = line.trim_start_matches('#').trim_start().trim_end();
+
+            if formatted_line.is_empty() {
+                formatted_line = "\n\n";
+            }
+
             docstring_lines.push(formatted_line);
             index -= 1;
         } else {
