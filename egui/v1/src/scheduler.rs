@@ -1,8 +1,9 @@
-use std::time::{Duration, Instant};
+use std::{sync::{Arc, Mutex}, time::{Duration, Instant}};
 
+#[derive(Clone)]
 struct InnerScheduler<T> {
     delay: Duration,
-    callback: Box<dyn FnMut() -> T>,
+    callback: Arc<Mutex<dyn FnMut() -> T + Send>>,
     time_scheduled: Instant,
 }
 
@@ -38,6 +39,7 @@ struct InnerScheduler<T> {
 ///     }
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Scheduler<T = ()> {
     inner: Option<InnerScheduler<T>>,
     pub done: bool
@@ -46,12 +48,12 @@ pub struct Scheduler<T = ()> {
 impl<T> Scheduler<T> {
     pub const UNSET: Self = Self { inner: None, done: true };
 
-    pub fn new(callback: impl FnMut() -> T + 'static, delay: Duration) -> Self {
+    pub fn new(callback: impl FnMut() -> T + Send + 'static, delay: Duration) -> Self {
         Self {
             inner: Some(
                 InnerScheduler {
                     delay,
-                    callback: Box::new(callback),
+                    callback: Arc::new(Mutex::new(callback)),
                     time_scheduled: Instant::now(),
                 }
             ),
@@ -77,10 +79,13 @@ impl<T> Scheduler<T> {
 
         if let Some(inner) = self.inner.as_mut() {
             if inner.time_scheduled.elapsed() >= inner.delay {
-                let return_value = (inner.callback)();
-                self.done = true;
 
-                return Some(return_value);
+                if let Ok(mut callback) = inner.callback.lock() {
+                    let return_value = (callback)();
+                    self.done = true;
+
+                    return Some(return_value);
+                }
             }
         }
 
