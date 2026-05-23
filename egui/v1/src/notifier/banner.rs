@@ -43,3 +43,12 @@ impl BannerText {
         }
     }
 }
+
+impl<S: ToString> From<S> for BannerText {
+    fn from(value: S) -> Self {
+        Self {
+            heading: Some(value.to_string()),
+            subtext: None 
+        }
+    }
+}

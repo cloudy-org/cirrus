@@ -69,10 +69,10 @@ impl Notifier {
     }
 
     /// Displays an overlayer banner at the bottom or the top of the screen.
-    pub fn show_banner(&mut self, text: BannerText, placement: BannerPlacement, duration: Duration) {
+    pub fn show_banner(&mut self, text: impl Into<BannerText>, placement: BannerPlacement, duration: Duration) {
         self.banner = Some(
             Banner {
-                text,
+                text: text.into(),
                 placement,
                 duration,
                 hide_scheduler: Scheduler::new(
