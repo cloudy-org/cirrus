@@ -53,7 +53,12 @@ impl OverlayerBanner {
             let background_colour = Color32::from_black_alpha((180.0 * alpha) as u8);
             let heading_text_colour = Color32::from_white_alpha((255.0 * alpha) as u8);
 
-            egui::Area::new(Id::new("overlayer_banner_area"))
+            egui::Area::new(
+                Id::new("overlayer_banner_area")
+                    .with(&banner.text)
+                    .with(&banner.duration)
+                    .with(&banner.placement)
+            )
                 .fixed_pos(
                     match banner.placement {
                         OverlayerBannerPlacement::TOP => {

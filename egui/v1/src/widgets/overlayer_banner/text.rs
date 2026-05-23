@@ -1,3 +1,4 @@
+#[derive(Hash)]
 pub struct OverlayerBannerText {
     pub heading: Option<String>,
     pub subtext: Option<String>,

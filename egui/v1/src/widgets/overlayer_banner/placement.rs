@@ -1,4 +1,5 @@
 
+#[derive(Hash)]
 pub enum OverlayerBannerPlacement {
     TOP,
     BOTTOM
