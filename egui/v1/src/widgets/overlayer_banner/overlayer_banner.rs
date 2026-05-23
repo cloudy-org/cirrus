@@ -11,6 +11,7 @@ struct Banner {
     hide_scheduler: Scheduler,
 }
 
+// NOTE: umm, should I merge this with Notifier??
 pub struct OverlayerBanner {
     banner: Option<Banner>,
 }
