@@ -59,6 +59,17 @@ impl<T> Scheduler<T> {
         }
     }
 
+    pub fn elapsed(&self) -> Duration {
+        match &self.inner {
+            Some(scheduler) => scheduler.time_scheduled.elapsed(),
+            None => Duration::default(),
+        }
+    }
+
+    /// Checks if the scheduled time has passed. You need to place this in your update loop.
+    /// 
+    /// This function only returns 'Some()' ONCE, and that is when the 
+    /// callback is called and enough time has elapsed since the set duration / delay.
     pub fn update(&mut self) -> Option<T> {
         if self.done == true {
             return None;

@@ -9,7 +9,7 @@ pub struct Loading {
     pub message: Option<String>,
 }
 
-/// A neat way to inform / notify the user of what is going on in your backend with Egui.
+/// A neat way to inform / notify the user of what is going on in the background of your app.
 #[derive(Clone)]
 pub struct Notifier {
     /// Is anything loading? `None` = nothing is loading.
