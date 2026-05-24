@@ -1,0 +1,44 @@
+name: Build and deploy cargo docs
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build cargo docs
+      - run: rustup update stable && rustup default stable
+        run: cargo doc --no-deps --workspace
+
+      - name: Create redirect
+        run: |
+          echo '<meta http-equiv="refresh" content="0;url=cirrus_authors_v1/index.html">' > target/doc/index.html
+
+      - name: Setup github pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload `/doc` as artifact to github pages.
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./target/doc
+
+  # Stolen from github docs
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{steps.deployment.outputs.page_url}}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
