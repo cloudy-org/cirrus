@@ -16,7 +16,7 @@ jobs:
       - name: Build cargo docs
       - uses: actions/checkout@v4
       - run: rustup update stable && rustup default stable
-        run: cargo doc --no-deps --workspace
+      - run: cargo doc --no-deps --workspace
 
       - name: Create redirect
         run: |
