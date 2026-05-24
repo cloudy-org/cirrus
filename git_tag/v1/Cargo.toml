@@ -1,5 +1,5 @@
 [package]
-name = "cirrus_git_tag"
+name = "cirrus_git_tag_v1"
 version = "0.1.0"
 edition = "2024"
 

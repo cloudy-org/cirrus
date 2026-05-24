@@ -1,8 +1,7 @@
 use egui::{Color32, CursorIcon, Response, Sense, Stroke, Ui, Vec2};
 
 /// Toggle button from Egui demo's app and modified a little to my liking:
-/// https://github.com/emilk/egui/blob/main/crates/egui_demo_lib/src/demo/toggle_switch.rs
-
+/// <https://github.com/emilk/egui/blob/main/crates/egui_demo_lib/src/demo/toggle_switch.rs>
 pub struct ToggleButton<'a> {
     size: Vec2,
     current_bool_value: &'a mut bool,

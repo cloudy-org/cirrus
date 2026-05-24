@@ -1,0 +1,15 @@
+[workspace]
+resolver = "3"
+members = [
+    "authors/*",
+    "clap_cli/*",
+    "config/*",
+    "edit/*",
+    "egui/*",
+    "error/*",
+    "git_tag/*",
+    "path/*",
+    "soft_binds/*",
+    "theming/*",
+    "updates/*",
+]

@@ -1,4 +1,4 @@
-use cirrus_config::{error::Error, template::Template};
+use cirrus_config_v1::{error::Error, template::Template};
 
 #[test]
 fn test_valid_template() -> Result<(), Error> {

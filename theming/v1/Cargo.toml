@@ -1,11 +1,11 @@
 [package]
-name = "cirrus_theming"
+name = "cirrus_theming_v1"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-cirrus_path = { path = "../../path/v1" }
-cirrus_error = { path = "../../error/v1" }
+cirrus_path = { package = "cirrus_path_v1", path = "../../path/v1" }
+cirrus_error = { package = "cirrus_error_v1", path = "../../error/v1" }
 
 log = "0.4"
 toml = "1.1"

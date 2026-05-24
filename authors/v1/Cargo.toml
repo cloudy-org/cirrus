@@ -1,9 +1,9 @@
 [package]
-name = "cirrus_authors"
+name = "cirrus_authors_v1"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-cirrus_git_tag = { path = "../../git_tag/v1" }
+cirrus_git_tag = { package = "cirrus_git_tag_v1", path = "../../git_tag/v1" }
 
 log = "0.4.27"
