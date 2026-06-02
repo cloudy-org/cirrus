@@ -10,6 +10,18 @@ pub(super) struct Banner {
     pub(super) hide_scheduler: Scheduler,
 }
 
+pub enum BannerDuration {
+    SHORT = 2,
+    BRIEF = 3,
+    LONG = 5,
+}
+
+impl Into<Duration> for BannerDuration {
+    fn into(self) -> Duration {
+        Duration::from_secs(self as u64)
+    }
+} 
+
 #[derive(Hash, Clone)]
 pub enum BannerPlacement {
     TOP,
