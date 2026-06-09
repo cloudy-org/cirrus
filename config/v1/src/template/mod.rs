@@ -16,8 +16,7 @@ pub struct TemplateKey {
 pub type TemplateKeys = BTreeMap<String, TemplateKey>;
 
 pub struct Template<'a> {
-    // umm, should Option be removed?
-    pub keys: Option<TemplateKeys>,
+    pub keys: TemplateKeys,
     pub ordered_paths: Vec<String>,
 
     template_config_toml_string: &'a str,
@@ -26,7 +25,7 @@ pub struct Template<'a> {
 impl<'a> Template<'a> {
     pub fn new(toml_template_string: &'a str) -> Self {
         Self {
-            keys: None,
+            keys: BTreeMap::new(),
             ordered_paths: Vec::new(),
             template_config_toml_string: toml_template_string
         }
@@ -55,7 +54,7 @@ impl<'a> Template<'a> {
             &mut template_keys
         );
 
-        self.keys = Some(template_keys);
+        self.keys = template_keys;
         self.ordered_paths = ordered_key_paths;
 
         Ok(())
