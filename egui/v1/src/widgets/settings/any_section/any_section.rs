@@ -225,7 +225,7 @@ impl AnySection<'_> {
                                         continue;
                                     }
 
-                                    ui.add(Separator::default().shrink(5.0));
+                                    ui.add(Separator::default().shrink(225.0));
                                     ui.end_row();
                                 }
                             });
