@@ -1,5 +1,5 @@
 use cirrus_config::template::TemplateKeys;
-use egui::{Color32, Frame, RichText, Separator, Stroke, TextWrapMode, Ui, Vec2};
+use egui::{Color32, CornerRadius, Frame, Margin, RichText, Stroke, TextWrapMode, Ui, Vec2};
 
 use crate::widgets::{buttons::toggle_button::ToggleButton, settings::{any_section::renderer::SettingsRenderer, section::{Section, SectionDisplayInfo}}};
 
@@ -195,46 +195,63 @@ impl AnySection<'_> {
                 AnySection::IntBig(section) => SettingsRenderer::show_int_drag_value(ui, desired_widget_size, section),
                 AnySection::ChildSections { sections, .. } => {
                     let child_grid = Frame::group(ui.style())
-                        .stroke(Stroke::NONE)
-                        .fill(*&child_surface_colour.gamma_multiply(0.4));
+                        .inner_margin(Margin::ZERO)
+                        .stroke(Stroke::NONE);
 
                     child_grid.show(ui, |ui| {
                         ui.vertical(|ui| {
-                            ui.scope(|ui| {
-                                ui.spacing_mut().item_spacing.y = 8.0;
+                            let last_section_index = sections.len() - 1;
 
-                                let last_section_index = sections.len() - 1;
+                            for (index, any_section) in sections.into_iter().enumerate() {
+                                ui.spacing_mut().item_spacing.y = 0.0;
 
-                                for (index, any_section) in sections.into_iter().enumerate() {
-                                    Frame::group(ui.style())
-                                        .stroke(Stroke::NONE)
-                                        .show(ui, |ui|{
+                                let surface_colour = match (index % 2) == 0 {
+                                    true => &child_surface_colour.gamma_multiply(0.4),
+                                    false => &child_surface_colour.gamma_multiply(0.8),
+                                };
+
+                                Frame::group(ui.style())
+                                    .corner_radius(
+                                        match index {
+                                            0 => CornerRadius {
+                                                nw: child_grid.corner_radius.nw,
+                                                ne: child_grid.corner_radius.ne,
+                                                ..Default::default()
+                                            },
+                                            index => {
+                                                if index == last_section_index {
+                                                    CornerRadius {
+                                                        se: child_grid.corner_radius.se,
+                                                        sw: child_grid.corner_radius.sw,
+                                                        ..Default::default()
+                                                    }
+                                                } else {
+                                                    CornerRadius::ZERO
+                                                }
+                                            }
+                                        }
+                                    )
+                                    .stroke(Stroke::NONE)
+                                    .fill(*surface_colour)
+                                    .show(ui, |ui| {
+                                        ui.scope(|ui| {
+                                            ui.spacing_mut().item_spacing = Vec2::new(6.0, 6.0);
+
                                             any_section.show(
                                                 ui,
                                                 child_surface_colour,
                                                 template_keys,
                                                 true,
                                             );
-
-                                            ui.take_available_width();
                                         });
 
-                                    ui.end_row();
+                                        ui.take_available_width();
+                                    });
 
-                                    if index == last_section_index {
-                                        continue;
-                                    }
-
-                                    ui.add(Separator::default().shrink(225.0));
-                                    ui.end_row();
-                                }
-                            });
+                                ui.end_row()
+                            }
                         });
-
-                        ui.take_available_width();
                     });
-
-                    ui.end_row();
 
                     return;
                 }
