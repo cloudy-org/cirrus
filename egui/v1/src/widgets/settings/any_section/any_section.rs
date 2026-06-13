@@ -240,10 +240,10 @@ impl AnySection<'_> {
                 }
             }
 
-            ui.add_space(2.0);
+            ui.add_space(1.0);
 
             ui.separator();
-            ui.add_space(2.0);
+            ui.add_space(1.0);
 
             ui.add(
                 egui::Label::new(
