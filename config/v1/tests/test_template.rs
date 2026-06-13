@@ -6,15 +6,9 @@ fn test_valid_template() -> Result<(), Error> {
 
     let mut template = Template::new(template_string);
 
-    assert!(template.keys.is_none(), "template.keys should be None");
-
     template.parse_keys()?;
 
-    assert!(template.keys.is_some(), "template.keys should be Some()");
-
-    let template_keys = template.keys.unwrap();
-
-    let meow_key = &template_keys["max_meows"];
+    let meow_key = &template.keys["max_meows"];
 
     assert_eq!(meow_key.defined_toml_value.as_integer(), Some(15));
     assert_eq!(meow_key.docstring.description.short, None); // TODO: change to some once brief descriptions are implemented
@@ -30,7 +24,7 @@ fn test_valid_template() -> Result<(), Error> {
         Some(expected_meow_key_long_description)
     );
 
-    let allow_sentient_ai_key = &template_keys["allow_sentient_ai"];
+    let allow_sentient_ai_key = &template.keys["allow_sentient_ai"];
 
     assert_eq!(allow_sentient_ai_key.defined_toml_value.as_bool(), Some(true));
     assert_eq!(allow_sentient_ai_key.docstring.description.short, None); // TODO: change to some once brief descriptions are implemented

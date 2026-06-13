@@ -1,13 +1,13 @@
 use cirrus_theming::theme::Theme;
-use cirrus_config::{config::CConfig, template::Template};
+use cirrus_config::{config::CConfig, template::TemplateKeys};
 
 use egui_notify::ToastLevel;
 use egui::{Color32, Context, CornerRadius, Frame, Key, Margin, RichText, Stroke, Ui};
 
-use crate::{config_manager::ConfigManager, notifier::{Notifier}, widgets::settings::section::AnySection};
+use crate::{config_manager::ConfigManager, notifier::Notifier, widgets::settings::any_section::AnySection};
 
 pub struct Settings<'a> {
-    sections: Vec<AnySection<'a>>
+    any_sections: Vec<AnySection<'a>>
 }
 
 /// This widget is idempotent, meaning it can be initialized on every 
@@ -15,16 +15,12 @@ pub struct Settings<'a> {
 impl<'a> Settings<'a> {
     pub fn new() -> Self {
         Self {
-            sections: Vec::new(),
+            any_sections: Vec::new(),
         }
     }
 
     pub fn add_section<T: Into<AnySection<'a>>>(&mut self, section: T) -> &mut Self {
-        // if self.sections.iter().any(|random_section| *random_section == section) {
-        //     return self;
-        // }
-
-        self.sections.push(section.into());
+        self.any_sections.push(section.into());
 
         self
     }
@@ -81,7 +77,7 @@ impl<'a> Settings<'a> {
         }
     }
 
-    pub fn show_ui(&mut self, ui: &mut Ui, theme: &Theme, template_config: &Template) {        
+    pub fn show_ui(&mut self, ui: &mut Ui, theme: &Theme, template_keys: &TemplateKeys) {        
         ui.vertical_centered(|ui| {
             ui.set_max_width(ui.available_width().min(900.0));
 
@@ -109,77 +105,22 @@ impl<'a> Settings<'a> {
                     ui.add_space(5.0);
                     ui.end_row();
 
-                    if let Some(template_keys) = &template_config.keys {
-                        for section in &mut self.sections {
-                            let (section_display_info, section_config_key_path) = match section {
-                                AnySection::String(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                                AnySection::OptionalString(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                                AnySection::Bool(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                                AnySection::IntTiny(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                                AnySection::IntSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                                AnySection::IntBig(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                                AnySection::FloatSmall(section) => (section.display_info.clone(), section.config_key_path.clone()),
-                            };
+                    for any_section in &mut self.any_sections {
+                        Frame::group(ui.style())
+                            .stroke(settings_section_stroke)
+                            .outer_margin(Margin { top: 7, ..Default::default() })
+                            .inner_margin(Margin { left: 12, right: 12, top: 4, bottom: 8 })
+                            .fill(settings_section_colour)
+                            .show(ui, |ui| {
+                                any_section.show(
+                                    ui,
+                                    &surface_colour,
+                                    template_keys,
+                                    false
+                                );
+                            });
 
-                            let (toml_config_key, config_docstring) = match template_keys.get(&section_config_key_path) {
-                                None => (
-                                    &section_config_key_path.split(".").last().expect(
-                                        "Failed to split section config key path! This is odd as the \
-                                        'config_key_path!()' macro should always return a dotted key path."
-                                    ).to_string(),
-                                    &section_display_info.description.unwrap_or_default()
-                                ),
-                                Some(template_key) => {
-                                    (
-                                        &template_key.key,
-                                        // NOTE: if there's no description we default to empty string for now, 
-                                        // in the future we will reflect that appropriately in the settings UI.
-                                        &template_key.docstring.description.long.clone().unwrap_or_default()
-                                    )
-                                }
-                            };
-
-                            let config_title = match &section_display_info.name {
-                                Some(name) => name.clone(),
-                                None => {
-                                    let title: &String = &toml_config_key
-                                        .replace("_", " ")
-                                        .split_whitespace()
-                                        .map(|word| {
-                                            let mut chars = word.chars();
-                                            match chars.next() {
-                                                Some(first_char) => format!(
-                                                    "{}{} ",
-                                                    first_char.to_uppercase().to_string(),
-                                                    chars.as_str()
-                                                ),
-                                                None => String::new(),
-                                            }
-                                        })
-                                        .collect();
-                    
-                                    let mut title = title.clone();
-                                    title.pop();
-                    
-                                    title
-                                },
-                            };
-
-                            Frame::group(ui.style())
-                                .stroke(settings_section_stroke)
-                                .outer_margin(Margin { top: 7, ..Default::default() })
-                                .inner_margin(Margin { left: 12, right: 12, top: 4, bottom: 8 })
-                                .fill(settings_section_colour)
-                                .show(ui, |ui|{
-                                    section.show(
-                                        ui,
-                                        &config_title,
-                                        config_docstring,
-                                    );
-                                });
-
-                            ui.end_row();
-                        }
+                        ui.end_row();
                     }
                 });
             });
