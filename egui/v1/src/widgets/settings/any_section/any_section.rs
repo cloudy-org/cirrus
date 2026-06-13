@@ -300,25 +300,21 @@ impl AnySection<'_> {
         match display_info.name {
             Some(name) => name,
             None => {
-                let mut title: String = final_config_key
-                    .replace("_", " ")
-                    .split_whitespace()
-                    .map(|word| {
-                        let mut chars = word.chars();
-                        match chars.next() {
-                            Some(first_char) => format!(
-                                "{}{} ",
-                                first_char.to_uppercase().to_string(),
-                                chars.as_str()
-                            ),
-                            None => String::new(),
-                        }
-                    })
-                    .collect();
+                let title = final_config_key
+                    .replace("_", " ");
 
-                title.pop();
+                let mut chars = title.chars();
 
-                title
+                match chars.next() {
+                    Some(first_char) => {
+                        format!(
+                            "{}{}",
+                            first_char.to_uppercase(),
+                            chars.as_str()
+                        )
+                    }
+                    None => String::new(),
+                }
             },
         }
     }
