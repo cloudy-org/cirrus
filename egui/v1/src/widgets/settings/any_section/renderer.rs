@@ -1,12 +1,32 @@
 use std::fmt::Display;
 
-use egui::{CursorIcon, Response, RichText, TextStyle, Ui, Vec2, emath::Numeric};
+use egui::{CursorIcon, RichText, TextBuffer, TextEdit, TextStyle, Ui, Vec2, emath::Numeric};
 
 use crate::{ui_utils::combo_box::ui_strong_selectable_value, widgets::settings::section::Section};
 
 pub struct SettingsRenderer {}
 
 impl SettingsRenderer {
+    pub fn show_text_input<T: TextBuffer + Display>(
+        ui: &mut Ui,
+        desired_widget_size: Vec2,
+        placeholder_text: Option<String>,
+        config_key_value: &mut T
+    ) {
+        let text_edit_placeholder = match &placeholder_text {
+            Some(placeholder) => placeholder,
+            None => "Enter text here..."
+        };
+
+        ui.add(
+            TextEdit::multiline(config_key_value)
+                .desired_rows(3)
+                .desired_width(desired_widget_size.x + 50.0)
+                .hint_text(text_edit_placeholder)
+                .font(TextStyle::Heading)
+        );
+    }
+
     pub fn show_combo_box<T: PartialEq + Display>(
         ui: &mut Ui,
         desired_widget_size: Vec2,

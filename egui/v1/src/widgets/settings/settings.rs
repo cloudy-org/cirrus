@@ -4,7 +4,7 @@ use cirrus_config::{config::CConfig, template::TemplateKeys};
 use egui_notify::ToastLevel;
 use egui::{Color32, Context, CornerRadius, Frame, Key, Margin, RichText, Stroke, Ui};
 
-use crate::{config_manager::ConfigManager, notifier::Notifier, widgets::settings::section::AnySection};
+use crate::{config_manager::ConfigManager, notifier::Notifier, widgets::settings::any_section::AnySection};
 
 pub struct Settings<'a> {
     any_sections: Vec<AnySection<'a>>
@@ -116,6 +116,7 @@ impl<'a> Settings<'a> {
                                     ui,
                                     &surface_colour,
                                     template_keys,
+                                    false
                                 );
                             });
 
