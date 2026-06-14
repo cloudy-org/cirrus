@@ -42,7 +42,7 @@ impl ColourPallet {
             is_dark: false,
             primary: Colour::from_hex(0xEDFFFF),
             interactive: Colour::from_hex(0xF0F2F2),
-            surface: Colour::from_hex(0xD1E6E6),
+            surface: Colour::from_hex(0xC9C9C9),
             text: Colour::from_hex(0x242424),
             accent: accent_colour
         }
