@@ -206,7 +206,7 @@ impl AnySection<'_> {
                                 ui.spacing_mut().item_spacing.y = 0.0;
 
                                 let surface_colour = match (index % 2) == 0 {
-                                    true => &child_surface_colour.gamma_multiply(0.2),
+                                    true => &child_surface_colour.gamma_multiply(0.4),
                                     false => &child_surface_colour.gamma_multiply(0.8),
                                 };
 
