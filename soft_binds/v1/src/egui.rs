@@ -1,5 +1,5 @@
-use egui::Key;
 use log::debug;
+use egui::{InputState, Key};
 
 use crate::{error::{Error, Result}, keys::Keys, tiny_lexer::Token};
 
@@ -45,6 +45,22 @@ impl Keys {
 
         modifiers
     }
+}
+
+pub fn parse_and_get_egui_input_reader_from_string<KFunc>(key_string: &String, key_map: KFunc) -> Result<impl FnMut(&InputState) -> bool + use<KFunc>>
+where
+    KFunc: Fn(&InputState, Key) -> bool,
+{
+    let keys =  Keys::new(key_string)?;
+
+    let egui_keys = keys.egui_keys()?;
+    let egui_modifiers = keys.egui_modifiers();
+
+    Ok(
+        move |i: &InputState| egui_keys.iter().all(
+            |&key| key_map(i, key) && i.modifiers.contains(egui_modifiers)
+        )
+    )
 }
 
 #[cfg(test)]
