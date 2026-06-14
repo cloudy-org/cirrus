@@ -33,7 +33,8 @@ impl Styling<'_> {
         };
 
         widgets.inactive.bg_fill = interactive_colour;
-        widgets.inactive.weak_bg_fill = interactive_colour.gamma_multiply(0.8); // used by buttons
+        // used by buttons, drop downs and more widgets
+        widgets.inactive.weak_bg_fill = interactive_colour.gamma_multiply(0.8);
         widgets.inactive.fg_stroke.color = stroke_colour;
 
         widgets.noninteractive.bg_fill = interactive_colour;
@@ -77,7 +78,7 @@ impl Styling<'_> {
             // like with the custom toggle button in cirrus hence this change is so the 
             // stroke is more visible when the toggle button widget is active.
             selection: Selection {
-                bg_fill: accent_colour.gamma_multiply(0.95),
+                bg_fill: accent_colour.blend(surface_colour.gamma_multiply(0.3)),
                 stroke: Stroke { width: 2.0, color: stroke_colour },
             },
             window_shadow: Shadow::NONE,

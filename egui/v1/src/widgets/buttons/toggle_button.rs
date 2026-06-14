@@ -48,7 +48,7 @@ impl<'a> ToggleButton<'a> {
             ui.painter().rect(
                 rect,
                 radius,
-                visuals.bg_fill.gamma_multiply(0.9),
+                visuals.weak_bg_fill.gamma_multiply(0.9),
                 visuals.bg_stroke,
                 egui::StrokeKind::Inside,
             );

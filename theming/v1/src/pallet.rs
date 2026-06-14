@@ -10,11 +10,12 @@ pub struct ColourPallet {
     /// Primary colour should be used for background colour (e.g: app window canvas).
     pub primary: Colour,
     pub interactive: Colour,
+    // TODO: correct this
     /// Surface should be lighter than primary by a subtle difference.
     /// 
     /// Surface is a supporting colour that blends with primary to create a secondary colour that is then 
     /// used on elevated layers to give subtle emphasis; like containers inside a section, cards, toolbars or 
-    /// backgrounds inside a panel.
+    /// backgrounds inside a panel. The blended secondary colour is also used on some interactable widgets.
     pub surface: Colour,
     /// Foreground text colour.
     pub text: Colour,
@@ -39,9 +40,9 @@ impl ColourPallet {
     pub(crate) fn default_light(accent_colour: Colour) -> Self {
         Self {
             is_dark: false,
-            primary: Colour::from_hex(0xD5EBEB),
-            interactive: Colour::from_hex(0xA6C4E3),
-            surface: Colour::from_hex(0xB8E2FF),
+            primary: Colour::from_hex(0xEDFFFF),
+            interactive: Colour::from_hex(0xF0F2F2),
+            surface: Colour::from_hex(0xD1E6E6),
             text: Colour::from_hex(0x242424),
             accent: accent_colour
         }
