@@ -4,9 +4,9 @@ use egui::{CursorIcon, RichText, TextBuffer, TextEdit, TextStyle, Ui, Vec2, emat
 
 use crate::{ui_utils::combo_box::ui_strong_selectable_value, widgets::settings::section::Section};
 
-pub struct SettingsRenderer {}
+pub struct InputWidgets {}
 
-impl SettingsRenderer {
+impl InputWidgets {
     pub fn show_text_input<T: TextBuffer + Display>(
         ui: &mut Ui,
         desired_widget_size: Vec2,
@@ -70,7 +70,7 @@ impl SettingsRenderer {
         };
 
         match &section.overrides.choices {
-            Some(choices) => SettingsRenderer::show_combo_box(
+            Some(choices) => Self::show_combo_box(
                 ui,
                 desired_widget_size,
                 choices.clone(),

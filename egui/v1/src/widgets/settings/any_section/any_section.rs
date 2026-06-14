@@ -1,7 +1,7 @@
 use cirrus_config::template::TemplateKeys;
 use egui::{Color32, CornerRadius, Frame, Margin, RichText, Stroke, TextWrapMode, Ui, Vec2};
 
-use crate::widgets::{buttons::toggle_button::ToggleButton, settings::{any_section::renderer::SettingsRenderer, section::{Section, SectionDisplayInfo}}};
+use crate::widgets::{buttons::toggle_button::ToggleButton, settings::{any_section::input_widgets::InputWidgets, section::{Section, SectionDisplayInfo}}};
 
 pub enum AnySection<'a> {
     String(Section<'a, String>),
@@ -99,14 +99,14 @@ impl AnySection<'_> {
             match self {
                 AnySection::String(section) => {
                     match &section.overrides.choices {
-                        Some(choices) => SettingsRenderer::show_combo_box(
+                        Some(choices) => InputWidgets::show_combo_box(
                             ui,
                             desired_widget_size,
                             choices.clone(),
                             &section.config_key_path,
                             section.config_key_value
                         ),
-                        None => SettingsRenderer::show_text_input(
+                        None => InputWidgets::show_text_input(
                             ui,
                             desired_widget_size,
                             section.overrides.text_edit_placeholder.clone(),
@@ -118,7 +118,7 @@ impl AnySection<'_> {
                     match section.config_key_value {
                         Some(config_value) => {
                             match &section.overrides.choices {
-                                Some(choices) => SettingsRenderer::show_combo_box(
+                                Some(choices) => InputWidgets::show_combo_box(
                                     ui,
                                     desired_widget_size,
                                     choices.iter()
@@ -127,7 +127,7 @@ impl AnySection<'_> {
                                     &section.config_key_path,
                                     config_value
                                 ),
-                                None => SettingsRenderer::show_text_input(
+                                None => InputWidgets::show_text_input(
                                     ui,
                                     desired_widget_size,
                                     section.overrides.text_edit_placeholder.clone(),
@@ -140,7 +140,7 @@ impl AnySection<'_> {
                         // this task for someone else as I cannot figure it out right away.
                         None => {
                             ui.add_enabled_ui(false, |ui| {
-                                SettingsRenderer::show_combo_box(
+                                InputWidgets::show_combo_box(
                                     ui,
                                     desired_widget_size,
                                     Vec::new(),
@@ -168,7 +168,7 @@ impl AnySection<'_> {
                     };
 
                     match &section.overrides.choices {
-                        Some(choices) => SettingsRenderer::show_combo_box(
+                        Some(choices) => InputWidgets::show_combo_box(
                             ui,
                             desired_widget_size,
                             choices.clone(),
@@ -190,9 +190,9 @@ impl AnySection<'_> {
                         }
                     };
                 },
-                AnySection::IntSmall(section) => SettingsRenderer::show_int_drag_value(ui, desired_widget_size, section),
-                AnySection::FloatSmall(section) => SettingsRenderer::show_int_drag_value(ui, desired_widget_size, section),
-                AnySection::IntBig(section) => SettingsRenderer::show_int_drag_value(ui, desired_widget_size, section),
+                AnySection::IntSmall(section) => InputWidgets::show_int_drag_value(ui, desired_widget_size, section),
+                AnySection::FloatSmall(section) => InputWidgets::show_int_drag_value(ui, desired_widget_size, section),
+                AnySection::IntBig(section) => InputWidgets::show_int_drag_value(ui, desired_widget_size, section),
                 AnySection::ChildSections { sections, .. } => {
                     let child_grid = Frame::group(ui.style())
                         .inner_margin(Margin::ZERO)
@@ -206,7 +206,7 @@ impl AnySection<'_> {
                                 ui.spacing_mut().item_spacing.y = 0.0;
 
                                 let surface_colour = match (index % 2) == 0 {
-                                    true => &child_surface_colour.gamma_multiply(0.4),
+                                    true => &child_surface_colour.gamma_multiply(0.2),
                                     false => &child_surface_colour.gamma_multiply(0.8),
                                 };
 
