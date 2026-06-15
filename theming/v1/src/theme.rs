@@ -2,31 +2,36 @@ use std::{fs, path::PathBuf};
 
 use toml::Table;
 
-use crate::{config, error::{Error, Result}, fallbacks::{ThemeFallbacks, ThemePalletFallbacks}, pallet::ColourPallet};
+use crate::{config, error::{Error, Result}, fallbacks::{ThemeFallbacks}, palette::ColourPalette};
 
 // TODO: Document Theme struct
 #[derive(Clone)]
 pub struct Theme {
     pub name: String,
-    pub pallet: ColourPallet
+    // pub features: Features,
+    pub palette: ColourPalette
 }
 
 impl Theme {
     pub fn default_dark(fallbacks: &ThemeFallbacks) -> Self {
         Self {
             name: String::from("Dark"),
-            pallet: ColourPallet::default_dark(fallbacks.pallet.accent_colour),
+            // features: Features {
+            //     derive_accent_from_system: true
+            // },
+            palette: ColourPalette::default_dark(fallbacks.system_derived_accent_colour),
         }
     }
 
-    pub fn default_light(fallbacks: &ThemeFallbacks) -> Self {
+    pub fn default_light() -> Self {
         Self {
             name: String::from("Light"),
-            pallet: ColourPallet::default_light(fallbacks.pallet.accent_colour),
+            // features: Features::default(),
+            palette: ColourPalette::default_light(),
         }
     }
 
-    pub(crate) fn parse_from_path(theme_path: PathBuf, pallet_fallbacks: &ThemePalletFallbacks) -> Result<Self> {
+    pub(crate) fn parse_from_path(theme_path: PathBuf, fallbacks: &ThemeFallbacks) -> Result<Self> {
         log::debug!("Parsing theme from path '{}'...", &theme_path.display());
 
         let theme_code_name = theme_path.file_name()
@@ -67,7 +72,7 @@ impl Theme {
         match generic_theme_table.get("version") {
             Some(theme_version) => {
                 match theme_version.as_integer() {
-                    Some(1) => Ok(config::v1::parse(&toml_string, pallet_fallbacks)?),
+                    Some(1) => Ok(config::v1::parse(&toml_string, fallbacks)?),
                     _ => Err(Error::ThemeTomlUnsupported { version: theme_version.to_string() }),
                 }
             },

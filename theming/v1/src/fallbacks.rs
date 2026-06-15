@@ -1,18 +1,13 @@
-use crate::{colour::Colour, pallet::DEFAULT_ACCENT_HEX};
+use crate::{colour::Colour, palette::DEFAULT_ACCENT_HEX};
 
-#[derive(Default)]
 pub struct ThemeFallbacks {
-    pub pallet: ThemePalletFallbacks,
+    pub system_derived_accent_colour: Colour,
 }
 
-pub struct ThemePalletFallbacks {
-    pub accent_colour: Colour,
-}
-
-impl Default for ThemePalletFallbacks {
+impl Default for ThemeFallbacks {
     fn default() -> Self {
         Self {
-            accent_colour: Colour::from_hex(DEFAULT_ACCENT_HEX)
+            system_derived_accent_colour: Colour::from_hex(DEFAULT_ACCENT_HEX)
         }
     }
 }

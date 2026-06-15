@@ -81,8 +81,8 @@ impl<'a> Settings<'a> {
         ui.vertical_centered(|ui| {
             ui.set_max_width(ui.available_width().min(900.0));
 
-            let surface_colour = Color32::from_hex(&theme.pallet.surface.to_hex_string()).unwrap();
-            let text_colour = Color32::from_hex(&theme.pallet.text.to_hex_string()).unwrap();
+            let surface_colour = Color32::from_hex(&theme.palette.surface.to_hex_string()).unwrap();
+            let text_colour = Color32::from_hex(&theme.palette.text.to_hex_string()).unwrap();
 
             // blend surface colour with the background colour (which is the primary colour).
             let settings_grid_colour = surface_colour.gamma_multiply(0.2);

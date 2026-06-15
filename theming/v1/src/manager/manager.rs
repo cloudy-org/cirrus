@@ -3,7 +3,7 @@ use std::{env, fs, path::PathBuf};
 use toml::Table;
 use cirrus_path::get_user_config_cloudy_folder_path;
 
-use crate::{colour::Colour, error::{Error, Result}, fallbacks::{ThemeFallbacks, ThemePalletFallbacks}, manager::origin::ThemeOrigin, pallet::DEFAULT_ACCENT_HEX, system::find_theme_in_system, theme::Theme};
+use crate::{colour::Colour, error::{Error, Result}, fallbacks::ThemeFallbacks, manager::origin::ThemeOrigin, palette::DEFAULT_ACCENT_HEX, system::find_theme_in_system, theme::Theme};
 
 /// ⚠️ Keep in mind this struct is unstable and may change soon with breaking changes.
 pub struct ThemeManager {
@@ -34,8 +34,6 @@ impl ThemeManager {
     }
 
     pub fn get_theme_from_env(mut self) -> Self {
-        // TODO: this will be upgraded to support multiple predefined cirrus themes in the future 
-        // (E.g: "CTK_THEME=candy_crush"). For now we'll just support our default dark and light themes.
         if let Ok(theme_name) = env::var("CTK_THEME") {
             log::debug!("Getting theme from environment variable...");
 
@@ -43,10 +41,9 @@ impl ThemeManager {
 
             let theme: Option<Theme> = match theme_name.to_lowercase().as_str() {
                 "dark" => Some(Theme::default_dark(theme_fallbacks)),
-                "light" => Some(Theme::default_light(theme_fallbacks)),
+                "light" => Some(Theme::default_light()),
                 theme_code_name => find_theme_in_system(
-                    theme_code_name.to_string(),
-                    &theme_fallbacks.pallet
+                    theme_code_name.to_string(), &theme_fallbacks
                 )
             };
 
@@ -77,9 +74,9 @@ impl ThemeManager {
             }
 
             // TODO: Fetch system accent colour.
-            self.fallbacks.pallet.accent_colour = Colour::from_hex(DEFAULT_ACCENT_HEX);
+            self.fallbacks.system_derived_accent_colour = Colour::from_hex(DEFAULT_ACCENT_HEX);
 
-            match find_theme_from_config(config_path, &self.fallbacks.pallet) {
+            match find_theme_from_config(config_path, &self.fallbacks) {
                 Ok(Some(theme)) => {
                     self.theme = theme;
                     self.origin = Some(ThemeOrigin::Config);
@@ -95,7 +92,7 @@ impl ThemeManager {
     }
 }
 
-fn find_theme_from_config(config_path: PathBuf, pallet_fallbacks: &ThemePalletFallbacks) -> Result<Option<Theme>, Error> {
+fn find_theme_from_config(config_path: PathBuf, theme_fallbacks: &ThemeFallbacks) -> Result<Option<Theme>, Error> {
     log::debug!("Checking global config toml for set theme...");
 
     // TODO: we should use the cirrus_config crate when it get's support for this global config. 
@@ -108,7 +105,7 @@ fn find_theme_from_config(config_path: PathBuf, pallet_fallbacks: &ThemePalletFa
     if let Some(theme_code_name_value) = generic_config_table.get("theme") {
         if let Some(theme_code_name) = theme_code_name_value.as_str() {
             return Ok(
-                find_theme_in_system(theme_code_name.to_string(), pallet_fallbacks)
+                find_theme_in_system(theme_code_name.to_string(), theme_fallbacks)
             );
         }
 

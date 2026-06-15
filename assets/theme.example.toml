@@ -2,8 +2,8 @@
 version = 1
 dark_mode = false # theme is a light mode theme.
 
-# A cheerful and colourful colour pallet.
-[pallet]
+# A cheerful and colourful colour palette.
+[palette]
 primary = "#F5FFFA" # Mint Cream
 interactive = "#F5CFC9"
 surface = "#F4C2C2" # Mimi Pink

@@ -32,7 +32,7 @@ impl<'a> Styling<'a> {
 
     pub fn apply(&self, ctx: &Context) {
         ctx.set_theme(
-            match self.theme.pallet.is_dark {
+            match self.theme.palette.is_dark {
                 true => egui::Theme::Dark,
                 false => egui::Theme::Light,
             }
