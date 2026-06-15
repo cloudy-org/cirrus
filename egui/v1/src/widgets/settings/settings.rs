@@ -81,13 +81,11 @@ impl<'a> Settings<'a> {
         ui.vertical_centered(|ui| {
             ui.set_max_width(ui.available_width().min(900.0));
 
-            let primary_colour = Color32::from_hex(&theme.pallet.primary.to_hex_string()).unwrap();
             let surface_colour = Color32::from_hex(&theme.pallet.surface.to_hex_string()).unwrap();
             let text_colour = Color32::from_hex(&theme.pallet.text.to_hex_string()).unwrap();
 
-            let settings_grid_colour = primary_colour.blend(
-                surface_colour.gamma_multiply(0.2)
-            );
+            // blend surface colour with the background colour (which is the primary colour).
+            let settings_grid_colour = surface_colour.gamma_multiply(0.2);
 
             let settings_section_colour = settings_grid_colour.blend(Color32::GRAY.gamma_multiply(0.1));
 
