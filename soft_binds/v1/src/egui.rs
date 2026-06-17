@@ -3,6 +3,8 @@ use egui::{InputState, Key};
 
 use crate::{error::{Error, Result}, keys::Keys, tiny_lexer::Token};
 
+pub type BoxedEguiInputReaderFunc = Box<dyn FnMut(&InputState) -> bool>;
+
 impl Keys {
     pub fn egui_keys(&self) -> Result<Vec<egui::Key>> {
         debug!("Parsing the soft-binds keys '{:?}' into egui keys...", self);
