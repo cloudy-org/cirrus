@@ -51,7 +51,15 @@ impl Notifier {
 
                 human_message
             },
-            StringOrError::String(string) => string,
+            StringOrError::String(string) => {
+                match level {
+                    ToastLevel::Warning => log::warn!("{}", string),
+                    ToastLevel::Error => log::error!("{}", string),
+                    _ => log::info!("{}", string),
+                }
+
+                string
+            },
         };
 
         let mut toast = Toast::custom(
