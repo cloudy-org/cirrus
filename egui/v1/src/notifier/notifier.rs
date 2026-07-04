@@ -1,10 +1,9 @@
 use std::{sync::{Arc, RwLock}, time::Duration};
 
-use cirrus_error::error::CError;
 use egui_notify::{Toast, ToastLevel, Toasts};
-use egui::{Align2, Color32, Id, Margin, Pos2, RichText, Ui};
+use egui::{Align2, Color32, Id, Margin, Order, Pos2, RichText, Ui};
 
-use crate::{notifier::banner::{Banner, BannerPlacement, BannerText}, scheduler::Scheduler};
+use crate::{notifier::{banner::{Banner, BannerPlacement, BannerText}, toast::{ToastError, ToastText}}, scheduler::Scheduler};
 
 #[derive(Clone, Default)]
 pub struct Loading {
@@ -33,15 +32,19 @@ impl Notifier {
         }
     }
 
-    pub fn toast(&self, text: impl Into<StringOrError>, level: ToastLevel, toast_mutator: impl FnOnce(&mut Toast)) {
-        let text = match text.into() {
-            StringOrError::Error(error) => {
-                let human_message = error.human_message();
+    #[deprecated(note = "'toast()' will be deprecated and removed soon, switch to 'show_toast()'!")]
+    pub fn toast(&self, text: impl Into<ToastText>, level: ToastLevel, toast_mutator: impl FnOnce(&mut Toast)) {
+        self.show_toast(text, level, toast_mutator)
+    }
 
-                let log_message = match error.actual_error() {
-                    Some(actual_error) => format!("{} \nActual Error: {}", human_message.replace("\n\n", "\n"), actual_error),
-                    None => human_message.clone(),
-                };
+    pub fn show_toast(&self, text: impl Into<ToastText>, level: ToastLevel, toast_mutator: impl FnOnce(&mut Toast)) {
+        let text = match text.into() {
+            ToastText::Error(ToastError { message, error }) => {
+                let log_message = format!(
+                    "{} \nDetailed Error:\n\n{}",
+                    message.replace("\n\n", "\n"),
+                    error
+                );
 
                 match level {
                     ToastLevel::Warning => log::warn!("{}", log_message),
@@ -49,9 +52,11 @@ impl Notifier {
                     _ => log::info!("{}", log_message),
                 }
 
-                human_message
+                format!(
+                    "{message} \n\nDetailed Error:\n\n{error}"
+                )
             },
-            StringOrError::String(string) => {
+            ToastText::String(string) => {
                 match level {
                     ToastLevel::Warning => log::warn!("{}", string),
                     ToastLevel::Error => log::error!("{}", string),
@@ -154,6 +159,7 @@ impl Notifier {
                 )
                 .pivot(Align2::CENTER_CENTER)
                 .interactable(false)
+                .order(Order::Foreground)
                 .show(ui.ctx(), |ui| {
                     egui::Frame::NONE
                         .fill(background_colour)
@@ -195,35 +201,5 @@ impl Notifier {
         if let Ok(toasts) = self.toasts.write().as_mut() {
             toasts.show(ui.ctx());
         }
-    }
-}
-
-#[derive(Clone)]
-pub enum StringOrError {
-    Error(Arc<dyn CError>),
-    String(String),
-}
-
-impl From<String> for StringOrError {
-    fn from(string: String) -> Self {
-        Self::String(string)
-    }
-}
-
-impl From<&str> for StringOrError {
-    fn from(string: &str) -> Self {
-        Self::String(string.to_owned())
-    }
-}
-
-impl<E: CError + 'static> From<Box<E>> for StringOrError {
-    fn from(error: Box<E>) -> Self {
-        Self::Error(Arc::new(*error))
-    }
-}
-
-impl From<Box<dyn CError>> for StringOrError {
-    fn from(error: Box<dyn CError>) -> Self {
-        Self::Error(error.into())
     }
 }

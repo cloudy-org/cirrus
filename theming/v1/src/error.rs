@@ -17,17 +17,17 @@ pub enum Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::HexCodeParseFailure { error, hex_string }  => write!(
-                f, "Failed to parse hex code! Hex code: '{hex_string}' \n\nError: '{error}'",
+            Error::HexCodeParseFailure { hex_string, .. }  => write!(
+                f, "Failed to parse hex code! Hex code: '{hex_string}'"
             ),
             Error::ThemeTomlUnsupported { version } => write!(
                 f,
                 "Unsupported theme version! This current version of the toolkit does not \
                 support version '{version}' of theme.toml! Make sure this application is update to date."
             ),
-            Error::ThemeTomlParseFailure { error } => write!(
+            Error::ThemeTomlParseFailure { .. } => write!(
                 f, "Failed to read the 'theme.toml' config file, it may be corrupted \
-                    or the reason below may state otherwise! \n\nError: {error}",
+                    or the reason below may state otherwise!"
             ),
             Error::ThemeTomlNoVersionKey { theme_code_name, theme_toml_path } => write!(
                 f,
@@ -39,9 +39,9 @@ impl Display for Error {
                 "The path at '{}' was not a theme!",
                 path.display()
             ),
-            Error::GlobalConfigParseFailure { error } => write!(
+            Error::GlobalConfigParseFailure { .. } => write!(
                 f, "Failed to read the global cloudy config file ('~/.config/cloudy/config.toml'), \
-                it may be corrupted or the reason below may state otherwise! \n\nError: {error}",
+                it may be corrupted or the reason below may state otherwise!"
             ),
         }
     }

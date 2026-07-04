@@ -8,7 +8,7 @@ use egui_notify::ToastLevel;
 use log::debug;
 use toml_edit::{Document, DocumentMut, Formatted, Item, Table, Value};
 
-use crate::{error::Error, notifier::Notifier, scheduler::Scheduler};
+use crate::{error::Error, notifier::{Notifier, toast::ToastText}, scheduler::Scheduler};
 
 pub struct ConfigManager<T: CConfig> {
     pub config: T,
@@ -75,7 +75,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
                 match result {
                     Ok(changed) => {
                         if changed {
-                            notifier.toast(
+                            notifier.show_toast(
                                 "Config has been autosaved!",
                                 ToastLevel::Success,
                                 |_| {}
@@ -83,7 +83,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
                         }
                     },
                     Err(error) => {
-                        notifier.toast(error, ToastLevel::Error, |_| {});
+                        notifier.show_toast(ToastText::Error(error.into()), ToastLevel::Error, |_| {});
                     }
                 }
 
@@ -98,7 +98,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
     }
 
     /// Only attempts to save config if there was a change.
-    pub fn save_if_changed(&mut self) -> Result<bool, Box<dyn CError>> {
+    pub fn save_if_changed(&mut self) -> Result<bool, Error> {
         // We're using hashes to detect changes to the config struct.
         let mut hasher = DefaultHasher::new();
         self.config.hash(&mut hasher);
@@ -118,7 +118,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
     }
 
     /// Writes the mutated config we currently have in memory to the user's config file in disk.
-    pub fn save(&mut self) -> Result<(), Box<dyn CError>> {
+    pub fn save(&mut self) -> Result<(), Error> {
         debug!("Saving mutated config to disk...");
 
         // TODO: now we need to make sure when a user updates the disk variant of 
@@ -150,7 +150,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
             *config_disk_copy = config_to_write_to_disk_document.to_string();
 
             fs::write(config_path, config_disk_copy)
-                .map_err(|error| Error::FailedToSaveConfig(error.to_string()))?;
+                .map_err(|error| Error::SaveConfigFailure { error: error.to_string() })?;
         }
 
         Ok(())

@@ -5,27 +5,28 @@
 // is a warning that it will be removed in the future hopefully for a better alternative.")]
 // pub trait EguiCError: CError + Clone {}
 
+use std::fmt::Display;
+
 use cirrus_error::error::CError;
 
 #[derive(Debug)]
 pub enum Error {
-    FailedToSaveConfig(String),
+    SaveConfigFailure{ error: String },
 
     UserConfigPathNotFound { error: String },
 }
 
-impl CError for Error {
-    fn human_message(&self) -> String {
-        match self {
-            Error::FailedToSaveConfig(actual_error) => format!("Failed to save config toml file! \n\nError: {}", actual_error),
-            Error::UserConfigPathNotFound { error } => format!("Failed to get user config path: {}", error),
-        }
-    }
+impl CError for Error {}
 
-    fn actual_error(&self) -> Option<String> {
+impl Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::FailedToSaveConfig(actual_error) => Some(actual_error.into()),
-            Error::UserConfigPathNotFound { error } => Some(error.into())
+            Error::SaveConfigFailure { .. } => write!(
+                f, "Failed to save config toml file!"
+            ),
+            Error::UserConfigPathNotFound { .. } => write!(
+                f, "Failed to get user config path"
+            ),
         }
     }
 }

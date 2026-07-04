@@ -10,9 +10,9 @@ pub enum Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::EditorCouldNotOpenFailure { error } => write!(
+            Error::EditorCouldNotOpenFailure { .. } => write!(
                 f,
-                "Failed to open system / user preferred text editor! \n\nError: {error}"
+                "Failed to open system / user preferred text editor!"
             ),
         }
     }

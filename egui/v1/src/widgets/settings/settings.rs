@@ -4,7 +4,7 @@ use cirrus_config::{config::CConfig, template::TemplateKeys};
 use egui_notify::ToastLevel;
 use egui::{Color32, Context, CornerRadius, Frame, Key, Margin, RichText, Stroke, Ui};
 
-use crate::{config_manager::ConfigManager, notifier::Notifier, widgets::settings::any_section::AnySection};
+use crate::{config_manager::ConfigManager, notifier::{Notifier, toast::ToastText}, widgets::settings::any_section::AnySection};
 
 pub struct Settings<'a> {
     any_sections: Vec<AnySection<'a>>
@@ -36,10 +36,10 @@ impl<'a> Settings<'a> {
             if force_save {
                 match config_manager.save() {
                     Ok(_) => {
-                        notifier.toast("Force saved config!", ToastLevel::Success, |_| {});
+                        notifier.show_toast("Force saved config!", ToastLevel::Success, |_| {});
                     },
                     Err(error) => {
-                        notifier.toast(error, ToastLevel::Error, |_| {});
+                        notifier.show_toast(ToastText::Error(error.into()), ToastLevel::Error, |_| {});
                     }
                 }
 
@@ -49,11 +49,11 @@ impl<'a> Settings<'a> {
             match config_manager.save_if_changed() {
                 Ok(changed) => {
                     if changed {
-                        notifier.toast("Config changes saved!", ToastLevel::Success, |_| {});
+                        notifier.show_toast("Config changes saved!", ToastLevel::Success, |_| {});
                     }
                 },
                 Err(error) => {
-                    notifier.toast(error, ToastLevel::Error, |_| {});
+                    notifier.show_toast(ToastText::Error(error.into()), ToastLevel::Error, |_| {});
                 }
             }
         };
