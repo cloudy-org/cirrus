@@ -2,7 +2,7 @@ use cirrus_theming::theme::Theme;
 use cirrus_config::{config::CConfig, template::TemplateKeys};
 
 use egui_notify::ToastLevel;
-use egui::{Color32, Context, CornerRadius, Frame, Key, Margin, RichText, Stroke, Ui};
+use egui::{Color32, Context, CornerRadius, Frame, Key, Margin, Modifiers, RichText, Stroke, Ui};
 
 use crate::{config_manager::ConfigManager, notifier::{Notifier, toast::ToastText}, widgets::settings::any_section::AnySection};
 
@@ -58,11 +58,11 @@ impl<'a> Settings<'a> {
             }
         };
 
-        if ctx.input(|i| i.modifiers.ctrl && i.key_pressed(Key::S)) && *show_state {
+        if *show_state && ctx.input(|i| i.modifiers.ctrl && i.key_pressed(Key::S)) {
             save_and_toast(true);
         }
 
-        if ctx.input(|input| input.key_pressed(Key::Escape)) && *show_state {
+        if *show_state && ctx.input_mut(|input| input.consume_key(Modifiers::default(), Key::Escape)) {
             *show_state = false;
 
             save_and_toast(false);
