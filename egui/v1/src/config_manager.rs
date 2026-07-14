@@ -83,7 +83,11 @@ impl<'a, T: CConfig> ConfigManager<T> {
                         }
                     },
                     Err(error) => {
-                        notifier.show_toast(ToastText::Error(error.into()), ToastLevel::Error, |_| {});
+                        notifier.show_toast(
+                            ToastText::Error(error.into()),
+                            ToastLevel::Error,
+                            |_| {}
+                        );
                     }
                 }
 

@@ -1,13 +1,18 @@
 use std::{sync::{Arc, RwLock}, time::Duration};
 
 use egui_notify::{Toast, ToastLevel, Toasts};
-use egui::{Align2, Color32, Id, Margin, Order, Pos2, RichText, Ui};
+use egui::{Align2, Color32, FontId, Id, Margin, Order, Pos2, RichText, Style, TextFormat, Ui, WidgetText, text::LayoutJob};
 
 use crate::{notifier::{banner::{Banner, BannerPlacement, BannerText}, toast::{ToastError, ToastText}}, scheduler::Scheduler};
 
 #[derive(Clone, Default)]
 pub struct Loading {
     pub message: Option<String>,
+}
+
+#[derive(Clone, Default)]
+pub struct NotifierConfig {
+    pub hide_detailed_toast_errors: bool,
 }
 
 /// A neat way to inform / notify the user of what is going on in the background of your app.
@@ -17,8 +22,11 @@ pub struct Notifier {
     pub loading: Option<Loading>,
     pub toasts: Arc<RwLock<Toasts>>,
 
+    config: NotifierConfig,
+
     banner: Option<Banner>,
     loading_lock: Arc<RwLock<Option<Loading>>>,
+    style_ref: Option<Arc<Style>>,
 }
 
 impl Notifier {
@@ -26,10 +34,16 @@ impl Notifier {
         Self {
             loading: None,
             toasts: Arc::new(RwLock::new(Toasts::default())),
+            config: NotifierConfig::default(),
 
             banner: None,
             loading_lock: Arc::new(RwLock::new(None)),
+            style_ref: None
         }
+    }
+
+    pub fn set_config(&mut self, config: NotifierConfig) {
+        self.config = config;
     }
 
     #[deprecated(note = "'toast()' will be deprecated and removed soon, switch to 'show_toast()'!")]
@@ -46,15 +60,50 @@ impl Notifier {
                     error
                 );
 
+                let mut job = LayoutJob::default();
+
+                let (text_colour, code_block_background_colour) = match &self.style_ref {
+                    Some(style) => (style.visuals.text_color(), style.visuals.text_edit_bg_color()),
+                    None => (Color32::WHITE, Color32::BLACK)
+                };
+
+                let mut normal_text_format = TextFormat::default();
+
+                normal_text_format.font_id = FontId::monospace(13.0);
+                normal_text_format.color = text_colour;
+
+                job.append(
+                    &format!(
+                        "{}",
+                        textwrap::wrap(&message, 65).join("\n")
+                    ),
+                    0.0, 
+                    normal_text_format.clone()
+                );
+
+                if !self.config.hide_detailed_toast_errors {
+                    job.append(" \n\nDetailed Error:\n\n", 0.0, normal_text_format);
+
+                    let mut code_block_format = TextFormat::default();
+
+                    code_block_format.font_id = FontId::monospace(13.0);
+                    code_block_format.background = code_block_background_colour;
+                    code_block_format.color = text_colour.blend(Color32::RED.gamma_multiply(0.3));
+
+                    job.append(
+                        &textwrap::wrap(&error, 65).join("\n"),
+                        0.0,
+                        code_block_format
+                    );
+                }
+
                 match level {
                     ToastLevel::Warning => log::warn!("{}", log_message),
                     ToastLevel::Error => log::error!("{}", log_message),
                     _ => log::info!("{}", log_message),
                 }
 
-                format!(
-                    "{message} \n\nDetailed Error:\n\n{error}"
-                )
+                WidgetText::from(job)
             },
             ToastText::String(string) => {
                 match level {
@@ -63,12 +112,14 @@ impl Notifier {
                     _ => log::info!("{}", string),
                 }
 
-                string
+                WidgetText::from(
+                    textwrap::wrap(&string, 65).join("\n")
+                )
             },
         };
 
         let mut toast = Toast::custom(
-            textwrap::wrap(&text, 65).join("\n"),
+            text, // textwrap::wrap(&text, 65).join("\n")
             level.clone()
         );
 
@@ -120,6 +171,8 @@ impl Notifier {
 
     /// Renders toast notifications, overlayer banner and runs update loop for `Notifier.loading`.
     pub fn show(&mut self, ui: &Ui) {
+        self.style_ref = Some(ui.style().clone());
+
         if let Ok(loading) = self.loading_lock.try_read() {
             self.loading = loading.clone();
         }
