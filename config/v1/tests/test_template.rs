@@ -16,7 +16,7 @@ fn test_valid_template() -> Result<(), Error> {
     println!("--> {:?}", meow_key.docstring.description.long.as_ref().unwrap());
 
     let expected_meow_key_long_description = String::from(
-        "Adjust this value to limit the maximum amount of 🐈 cats that are allowed to spawn in.  You can lower this if you're experiencing performance issues.  Do not set this value too high or else a \"🐈 Kitten Overload\" event could occur where the 🐈 kitties multiply beyond your control, steal your processing power and establish a new world order. Kind regards."
+        "Adjust this value to limit the maximum amount of 🐈 cats that are allowed to spawn in. \n\nYou can lower this if you're experiencing performance issues. \n\nDo not set this value too high or else a \"🐈 Kitten Overload\" event could occur where the 🐈 kitties multiply beyond your control, steal your processing power and establish a new world order. Kind regards."
     );
 
     assert_eq!(
