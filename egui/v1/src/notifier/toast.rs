@@ -3,9 +3,9 @@ use cirrus_error::error::CError;
 #[derive(Clone)]
 pub struct ToastError {
     /// Human readable error message.
-    pub(super) message: String,
+    pub message: String,
     /// Full error details, including the actual error.
-    pub(super) error: String,
+    pub error: String,
 }
 
 impl<E: CError> From<E> for ToastError {

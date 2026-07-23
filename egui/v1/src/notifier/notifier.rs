@@ -177,6 +177,7 @@ impl Notifier {
             self.loading = loading.clone();
         }
 
+        // TODO: move to Banner, like banner.show() maybe.
         if let Some(banner) = &mut self.banner {
             let window_rect = ui.ctx().viewport_rect();
             let scheduler = &mut banner.hide_scheduler;
