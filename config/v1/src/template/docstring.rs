@@ -52,7 +52,9 @@ pub fn parse_key_docstring(toml_string: &str, key_line_number: usize) -> KeyDocs
                             other_line => format!("{} ", other_line)
                         }
                     })
-                    .collect();
+                    .collect::<String>()
+                    .trim_end()
+                    .to_owned();
 
                 KeyDocstringDescription {
                     short: None, // TODO: implement short (brief) description.
