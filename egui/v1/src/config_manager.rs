@@ -2,7 +2,6 @@ use std::{fs, hash::{DefaultHasher, Hasher}, path::PathBuf, time::Duration};
 
 use cirrus_config::{config::{get_and_create_config_file, CConfig}, error::Error as ConfigError};
 use cirrus_error::error::CError;
-use cirrus_path::get_user_config_cloudy_folder_path;
 use egui::Context;
 use egui_notify::ToastLevel;
 use log::debug;
@@ -35,28 +34,24 @@ impl<'a, T: CConfig> Default for ConfigManager<T> {
 
 impl<'a, T: CConfig> ConfigManager<T> {
     pub fn new(app_name: &str, template_config_toml_string: &'a str) -> Result<Self, Box<dyn CError>> {
-        let config: T = get_and_create_config_file(app_name, template_config_toml_string)?;
+        let (config, path) = get_and_create_config_file::<T>(app_name, template_config_toml_string)?;
 
         let mut hasher = DefaultHasher::new();
         config.hash(&mut hasher);
 
         let config_hash = hasher.finish();
 
-        let config_path = get_user_config_cloudy_folder_path()
-            .map_err(|error| Error::UserConfigPathNotFound { error: error.to_string() })?
-            .join(app_name).join("config.toml");
-
         // Reading the config here really shouldn't fail as that would be caught by 
         // "get_and_create_config_file" but I guess just to be extra safe and panic-less 
         // let's map it to the same exact error.
-        let copy_of_config_on_disk = fs::read_to_string(&config_path)
+        let copy_of_config_on_disk = fs::read_to_string(&path)
             .map_err(|error| ConfigError::FailedToReadConfig(error.to_string()))?;
 
         Ok(
             Self {
                 config,
                 last_config_hash: config_hash,
-                config_path: Some(config_path),
+                config_path: Some(path),
                 config_disk_string_copy: Some(copy_of_config_on_disk),
                 config_autosave_schedule: None
             }

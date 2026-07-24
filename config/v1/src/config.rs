@@ -1,4 +1,4 @@
-use std::{fs, hash::Hash};
+use std::{fs, hash::Hash, path::{PathBuf}};
 
 use log::debug;
 use serde::{de::DeserializeOwned, Serialize};
@@ -8,30 +8,33 @@ use crate::error::Error;
 
 pub trait CConfig: DeserializeOwned + Serialize + Hash + Default {}
 
-pub fn get_and_create_config_file<T: CConfig>(app_name: &str, template_config_toml_string: &str) -> Result<T, Error> {
-    let roseate_config_dir_path = get_user_config_cloudy_folder_path()
+pub fn get_and_create_config_file<T: CConfig>(app_name: &str, template_config_toml_string: &str) -> Result<(T, PathBuf), Error> {
+    let config_dir_path = get_user_config_cloudy_folder_path()
         .map_err(|error| Error::UserConfigPathNotFound {error: error.to_string()})?
         .join(&app_name);
 
-    if !roseate_config_dir_path.exists() {
-        debug!("Config directory missing ({}), creating dir for '{}'...", roseate_config_dir_path.display(), app_name);
+    if !config_dir_path.exists() {
+        debug!("Config directory missing ({}), creating dir for '{}'...", config_dir_path.display(), app_name);
 
-        if let Err(error) = fs::create_dir_all(&roseate_config_dir_path) {
+        if let Err(error) = fs::create_dir_all(&config_dir_path) {
             return Err(Error::FailedToCreateConfigDirectory(error.to_string()));
         }
 
         debug!("Config directory created!");
     }
 
-    let toml_config_path = roseate_config_dir_path.join("config.toml");
+    let toml_config_path = config_dir_path.join("config.toml");
 
     if toml_config_path.exists() {
         debug!("Reading and deserializing config file...");
 
         return match fs::read_to_string(&toml_config_path) {
             Ok(value) => Ok(
-                toml::from_str::<T>(&value)
-                    .map_err(|error| Error::FailedToReadConfig(error.to_string()))?
+                (
+                    toml::from_str::<T>(&value)
+                        .map_err(|error| Error::FailedToReadConfig(error.to_string()))?,
+                    toml_config_path
+                )
             ),
             Err(error) => Err(Error::FailedToReadConfig(error.to_string()).into()),
         };
@@ -48,8 +51,11 @@ pub fn get_and_create_config_file<T: CConfig>(app_name: &str, template_config_to
 
     match result {
         Ok(_) => Ok(
-            toml::from_str(template_config_toml_string)
-                .expect("Failed to deserialize template toml file!")
+            (
+                toml::from_str(template_config_toml_string)
+                    .expect("Failed to deserialize template toml file!"),
+                config_dir_path
+            )
             // I'm panicking here as if this fails to deserialize it's our fault!
             // Tests should be put in place to ensure this doesn't happen from our end.
             // 
