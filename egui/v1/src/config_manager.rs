@@ -1,7 +1,6 @@
 use std::{fs, hash::{DefaultHasher, Hasher}, path::PathBuf, time::Duration};
 
 use cirrus_config::{config::{get_and_create_config_file, CConfig}, error::Error as ConfigError};
-use cirrus_error::error::CError;
 use egui::Context;
 use egui_notify::ToastLevel;
 use log::debug;
@@ -33,7 +32,7 @@ impl<'a, T: CConfig> Default for ConfigManager<T> {
 }
 
 impl<'a, T: CConfig> ConfigManager<T> {
-    pub fn new(app_name: &str, template_config_toml_string: &'a str) -> Result<Self, Box<dyn CError>> {
+    pub fn new(app_name: &str, template_config_toml_string: &'a str) -> Result<Self, ConfigError> {
         let (config, path) = get_and_create_config_file::<T>(app_name, template_config_toml_string)?;
 
         let mut hasher = DefaultHasher::new();

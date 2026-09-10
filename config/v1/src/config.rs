@@ -1,4 +1,4 @@
-use std::{fs, hash::Hash, path::{PathBuf}};
+use std::{fmt::Debug, fs, hash::Hash, path::{PathBuf}};
 
 use log::debug;
 use serde::{de::DeserializeOwned, Serialize};
@@ -6,7 +6,7 @@ use cirrus_path::{get_user_config_cloudy_folder_path};
 
 use crate::error::Error;
 
-pub trait CConfig: DeserializeOwned + Serialize + Hash + Default {}
+pub trait CConfig: DeserializeOwned + Serialize + Hash + PartialEq + Debug + Default {}
 
 pub fn get_and_create_config_file<T: CConfig>(app_name: &str, template_config_toml_string: &str) -> Result<(T, PathBuf), Error> {
     let config_dir_path = get_user_config_cloudy_folder_path()
