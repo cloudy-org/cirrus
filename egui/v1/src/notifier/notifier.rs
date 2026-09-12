@@ -1,9 +1,11 @@
 use std::{sync::{Arc, RwLock}, time::Duration};
 
-use egui_notify::{Toast, ToastLevel, Toasts};
+use egui_notify::{Toast, Toasts};
 use egui::{Align2, Color32, FontId, Id, Margin, Order, Pos2, RichText, Style, TextFormat, Ui, WidgetText, text::LayoutJob};
 
 use crate::{notifier::{banner::{Banner, BannerPlacement, BannerText}, toast::{ToastError, ToastText}}, scheduler::Scheduler};
+
+pub use egui_notify::ToastLevel; // so applications can call show_toast with `ToastLevel` without including the 'egui_notify' crate
 
 #[derive(Clone, Default)]
 pub struct Loading {
