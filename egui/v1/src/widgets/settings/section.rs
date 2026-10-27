@@ -15,7 +15,8 @@ pub struct Section<'a, T> {
 pub struct SectionOverrides<T> {
     pub choices: Option<Vec<T>>,
     pub int_range: Option<RangeInclusive<T>>,
-    pub text_edit_placeholder: Option<String>
+    pub text_edit_placeholder: Option<String>,
+    pub section_disabled: bool,
 }
 
 #[derive(Default, Clone)]

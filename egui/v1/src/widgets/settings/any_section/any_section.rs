@@ -5,7 +5,6 @@ use crate::widgets::{buttons::toggle_button::ToggleButton, settings::{any_sectio
 
 pub enum AnySection<'a> {
     String(Section<'a, String>),
-    OptionalString(Section<'a, Option<String>>),
     Bool(Section<'a, bool>),
     IntTiny(Section<'a, u8>),
     IntSmall(Section<'a, i32>),
@@ -13,7 +12,7 @@ pub enum AnySection<'a> {
     IntBig(Section<'a, i64>),
 
     ChildSections {
-        title: String,
+        title: Option<String>,
         sections: Vec<AnySection<'a>>
     }
 }
@@ -24,11 +23,11 @@ impl<'a> From<Section<'a, String>> for AnySection<'a> {
     }
 }
 
-impl<'a> From<Section<'a, Option<String>>> for AnySection<'a> {
-    fn from(section: Section<'a, Option<String>>) -> Self {
-        AnySection::OptionalString(section)
-    }
-}
+// impl<'a> From<Section<'a, Option<String>>> for AnySection<'a> {
+//     fn from(section: Section<'a, Option<String>>) -> Self {
+//         AnySection::OptionalString(section)
+//     }
+// }
 
 impl<'a> From<Section<'a, bool>> for AnySection<'a> {
     fn from(section: Section<'a, bool>) -> Self {
@@ -91,7 +90,13 @@ impl AnySection<'_> {
             false => (24.0, Vec2::new(5.0, 2.8))
         };
 
-        ui.heading(RichText::new(self.get_title()).size(heading_size));
+        if self.is_section_disabled() {
+            ui.disable();
+        }
+
+        if let Some(heading) = self.get_title() {
+            ui.heading(RichText::new(heading).size(heading_size));
+        }
 
         ui.horizontal(|ui| {
             let desired_widget_size = ui.spacing().interact_size.y * widget_size;
@@ -114,48 +119,94 @@ impl AnySection<'_> {
                         )
                     };
                 },
-                AnySection::OptionalString(section) => {
-                    match section.config_key_value {
-                        Some(config_value) => {
-                            match &section.overrides.choices {
-                                Some(choices) => InputWidgets::show_combo_box(
-                                    ui,
-                                    desired_widget_size,
-                                    choices.iter()
-                                        .filter_map(|choice| choice.clone())
-                                        .collect(),
-                                    &section.config_key_path,
-                                    config_value
-                                ),
-                                None => InputWidgets::show_text_input(
-                                    ui,
-                                    desired_widget_size,
-                                    section.overrides.text_edit_placeholder.clone(),
-                                    config_value
-                                )
-                            };
-                        },
-                        // TODO: we need to add a button to set this optional 
-                        // config key to None or back to Some (a value). I'll leave 
-                        // this task for someone else as I cannot figure it out right away.
-                        None => {
-                            ui.add_enabled_ui(false, |ui| {
-                                InputWidgets::show_combo_box(
-                                    ui,
-                                    desired_widget_size,
-                                    Vec::new(),
-                                    &section.config_key_path,
-                                    &mut "NONE"
-                                );
-                            }).response.on_disabled_hover_text(
-                                format!(
-                                    "Optional config key '{}' is not present in the config file!",
-                                    section.config_key_path
-                                )
-                            );
-                        },
-                    }
-                },
+                // TODO: remove optional string for just AnySection::String with "unset" or "custom" choice 
+                // AnySection::OptionalString(section) => {
+                //     ui.vertical(|ui| {
+                //         match section.config_key_value {
+                //             Some(config_value) => {
+                //                 match &section.overrides.choices {
+                //                     Some(choices) => InputWidgets::show_combo_box(
+                //                         ui,
+                //                         desired_widget_size,
+                //                         choices.iter()
+                //                             .filter_map(|choice| choice.clone())
+                //                             .collect(),
+                //                         &section.config_key_path,
+                //                         config_value
+                //                     ),
+                //                     None => InputWidgets::show_text_input(
+                //                         ui,
+                //                         desired_widget_size,
+                //                         section.overrides.text_edit_placeholder.clone(),
+                //                         config_value
+                //                     )
+                //                 };
+
+                //                 ui.shrink_width_to_current();
+
+                //                 ui.add_space(5.0);
+
+                //                 ui.vertical_centered(|ui| {
+                //                     let button = egui::Button::new("Disable")
+                //                         .min_size(Vec2 { x: 70.0, y: 30.0 });
+
+                //                     if ui.add(button).on_hover_cursor(CursorIcon::PointingHand).clicked() {
+                //                         *section.config_key_value = None;
+                //                     }
+                //                 });
+                //             },
+                //             // TODO: we need to add a button to set this optional 
+                //             // config key to None or back to Some (a value). I'll leave 
+                //             // this task for someone else as I cannot figure it out right away.
+                //             None => {
+                //                 ui.add_enabled_ui(false, |ui| {
+                //                     match &section.overrides.choices {
+                //                         Some(_) => InputWidgets::show_combo_box(
+                //                             ui,
+                //                             desired_widget_size,
+                //                             Vec::new(),
+                //                             &section.config_key_path,
+                //                             &mut "DISABLED"
+                //                         ),
+                //                         None => InputWidgets::show_text_input(
+                //                             ui,
+                //                             desired_widget_size,
+                //                             section.overrides.text_edit_placeholder.clone(),
+                //                             &mut "DISABLED"
+                //                         )
+                //                     };
+                //                 }).response
+                //                     .on_disabled_hover_text(
+                //                         format!(
+                //                             "Optional config key '{}' is unset (or commented out), hence the setting has been disabled! \
+                //                                 Click the 'Enable' button below to add back the key and enable it.",
+                //                             section.config_key_path
+                //                         )
+                //                     );
+
+                //                 ui.shrink_width_to_current();
+
+                //                 ui.add_space(5.0);
+
+                //                 ui.vertical_centered(|ui| {
+                //                     let button = egui::Button::new("Enable")
+                //                         .min_size(Vec2 { x: 70.0, y: 30.0 });
+
+                //                     if ui.add(button).on_hover_cursor(CursorIcon::PointingHand).clicked() {
+                //                         match &section.overrides.choices {
+                //                             Some(choices) => {
+                //                                 if let Some(Some(choice)) = choices.first() {
+                //                                     *section.config_key_value = Some(choice.to_string());
+                //                                 }
+                //                             },
+                //                             None => *section.config_key_value = Some(String::default()),
+                //                         }
+                //                     }
+                //                 });
+                //             },
+                //         }
+                //     });
+                // },
                 AnySection::Bool(section) => {
                     ToggleButton::new(&mut section.config_key_value)
                         .size(widget_size)
@@ -200,7 +251,7 @@ impl AnySection<'_> {
 
                     child_grid.show(ui, |ui| {
                         ui.vertical(|ui| {
-                            let last_section_index = sections.len() - 1;
+                            let last_section_index = sections.len().checked_sub(1).unwrap_or_default();
 
                             for (index, any_section) in sections.into_iter().enumerate() {
                                 ui.spacing_mut().item_spacing.y = 0.0;
@@ -271,10 +322,10 @@ impl AnySection<'_> {
         });
     }
 
-    fn get_title(&self) -> String {
+    fn get_title(&self) -> Option<String> {
         let config_key_path = match self {
             AnySection::String(section) => &section.config_key_path,
-            AnySection::OptionalString(section) => &section.config_key_path,
+            // AnySection::OptionalString(section) => &section.config_key_path,
             AnySection::Bool(section) => &section.config_key_path,
             AnySection::IntTiny(section) => &section.config_key_path,
             AnySection::IntSmall(section) => &section.config_key_path,
@@ -295,7 +346,7 @@ impl AnySection<'_> {
         let display_info = self.get_display_info();
 
         match display_info.name {
-            Some(name) => name,
+            Some(name) => Some(name),
             None => {
                 let title = final_config_key
                     .replace("_", " ");
@@ -304,13 +355,15 @@ impl AnySection<'_> {
 
                 match chars.next() {
                     Some(first_char) => {
-                        format!(
-                            "{}{}",
-                            first_char.to_uppercase(),
-                            chars.as_str()
+                        Some(
+                            format!(
+                                "{}{}",
+                                first_char.to_uppercase(),
+                                chars.as_str()
+                            )
                         )
                     }
-                    None => String::new(),
+                    None => None,
                 }
             },
         }
@@ -319,7 +372,7 @@ impl AnySection<'_> {
     fn get_description<'a>(&'a self, template_keys: &TemplateKeys) -> Option<String> {
         let config_key_path = match self {
             AnySection::String(section) => &section.config_key_path,
-            AnySection::OptionalString(section) => &section.config_key_path,
+            // AnySection::OptionalString(section) => &section.config_key_path,
             AnySection::Bool(section) => &section.config_key_path,
             AnySection::IntTiny(section) => &section.config_key_path,
             AnySection::IntSmall(section) => &section.config_key_path,
@@ -340,13 +393,26 @@ impl AnySection<'_> {
     fn get_display_info(&self) -> SectionDisplayInfo {
         match self {
             AnySection::String(section) => section.display_info.clone(),
-            AnySection::OptionalString(section) => section.display_info.clone(),
+            // AnySection::OptionalString(section) => section.display_info.clone(),
             AnySection::Bool(section) => section.display_info.clone(),
             AnySection::IntTiny(section) => section.display_info.clone(),
             AnySection::IntSmall(section) => section.display_info.clone(),
             AnySection::FloatSmall(section) => section.display_info.clone(),
             AnySection::IntBig(section) => section.display_info.clone(),
             AnySection::ChildSections { .. } => SectionDisplayInfo::default(),
+        }
+    }
+
+    fn is_section_disabled(&self) -> bool {
+        match self {
+            AnySection::String(section) => section.overrides.section_disabled,
+            // AnySection::OptionalString(section) => section.overrides.section_disabled,
+            AnySection::Bool(section) => section.overrides.section_disabled,
+            AnySection::IntTiny(section) => section.overrides.section_disabled,
+            AnySection::IntSmall(section) => section.overrides.section_disabled,
+            AnySection::FloatSmall(section) => section.overrides.section_disabled,
+            AnySection::IntBig(section) => section.overrides.section_disabled,
+            AnySection::ChildSections { .. } => false,
         }
     }
 }

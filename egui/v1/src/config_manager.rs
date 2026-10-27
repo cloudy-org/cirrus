@@ -232,7 +232,7 @@ impl<'a, T: CConfig> ConfigManager<T> {
                 Some(table_like) => {
                     match table_like.get_mut(part) {
                         Some(new_item) => {
-                            item_to_edit = new_item
+                            item_to_edit = new_item;
                         },
                         None => return
                     }
