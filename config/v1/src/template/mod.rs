@@ -69,8 +69,6 @@ impl<'a> Template<'a> {
         template_keys: &mut TemplateKeys
     ) {
         for (key, item) in toml_table.iter() {
-            // println!("Key: {}", key);
-
             let path = match path {
                 Some(path) => &format!("{}.{}", path, key),
                 None => &key.to_string(),

@@ -16,6 +16,7 @@ pub struct SectionOverrides<T> {
     pub choices: Option<Vec<T>>,
     pub int_range: Option<RangeInclusive<T>>,
     pub text_edit_placeholder: Option<String>,
+    pub docs_config_key_path: Option<String>,
     pub section_disabled: bool,
 }
 

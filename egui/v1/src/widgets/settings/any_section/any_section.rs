@@ -371,13 +371,13 @@ impl AnySection<'_> {
 
     fn get_description<'a>(&'a self, template_keys: &TemplateKeys) -> Option<String> {
         let config_key_path = match self {
-            AnySection::String(section) => &section.config_key_path,
+            AnySection::String(section) => section.overrides.docs_config_key_path.as_ref().unwrap_or(&section.config_key_path),
             // AnySection::OptionalString(section) => &section.config_key_path,
-            AnySection::Bool(section) => &section.config_key_path,
-            AnySection::IntTiny(section) => &section.config_key_path,
-            AnySection::IntSmall(section) => &section.config_key_path,
-            AnySection::FloatSmall(section) => &section.config_key_path,
-            AnySection::IntBig(section) => &section.config_key_path,
+            AnySection::Bool(section) => section.overrides.docs_config_key_path.as_ref().unwrap_or(&section.config_key_path),
+            AnySection::IntTiny(section) => section.overrides.docs_config_key_path.as_ref().unwrap_or(&section.config_key_path),
+            AnySection::IntSmall(section) => section.overrides.docs_config_key_path.as_ref().unwrap_or(&section.config_key_path),
+            AnySection::FloatSmall(section) => section.overrides.docs_config_key_path.as_ref().unwrap_or(&section.config_key_path),
+            AnySection::IntBig(section) => section.overrides.docs_config_key_path.as_ref().unwrap_or(&section.config_key_path),
             AnySection::ChildSections { .. } => return None,
         };
 
